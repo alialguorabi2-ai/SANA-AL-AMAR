@@ -157,6 +157,8 @@ function openCourse(id=null){
   if(PREVIEW){setNotice("وضع المعاينة لا يسمح بتغيير البيانات. يتطلب الحفظ حساب إدارة مخوّلاً.");return}
   editingId=id;const form=$("courseForm");form.reset();$("formMessage").textContent="";
   const c=courses.find(row=>String(row.id)===String(id));
+  $("saveCourse").textContent=c?"حفظ التعديلات":"حفظ المسودة";
+  form.elements.namedItem("slug").dataset.manual=c?"1":"";
   const o=c?offeringFor(c.id):null;
   $("dialogTitle").textContent=c?"تعديل الدورة التدريبية":"إضافة دورة تدريبية";
   const fieldMap={title_ar:c?.title_ar,title_en:c?.title_en,slug:c?.slug,short_description_ar:c?.short_description_ar,outline_ar:c?.outline_ar,cover_image_url:c?.cover_image_url,certificate_type:c?.certificate_type||"sana_al_amar",training_year:o?.training_year||new Date().getFullYear(),delivery_mode:o?.delivery_mode||"in_person",duration_days:o?.duration_days,duration_hours:o?.duration_hours,seat_capacity:o?.seat_capacity,target_audience_ar:o?.target_audience_ar,audience_scope:o?.audience_scope||"individual"};
@@ -215,7 +217,15 @@ async function updateRequest(id,status){
     await listData();setNotice("تم تحديث حالة طلب التسجيل.");
   }catch(error){setNotice("تعذر تعديل حالة الطلب: "+error.message,true);await listData();}
 }
-function logout(){
+async function logout(){
+  const token=session?.access_token;
+  if(token&&!PREVIEW){
+    try{
+      await fetch(CONFIG.url+"/auth/v1/logout",{
+        method:"POST",headers:{apikey:CONFIG.publishableKey,Authorization:"Bearer "+token}
+      });
+    }catch{ /* Always clear the local session even when offline. */ }
+  }
   session=null;currentUser=null;sessionStorage.removeItem(AUTH_KEY);
   location.href=location.pathname;
 }
