@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#082b4a">
+  <meta name="description" content="لوحة إدارة سنا الإعمار للدورات والتسجيلات.">
+  <title>SANA AL-AMAR | لوحة الإدارة</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" class="icon-sprite" aria-hidden="true">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-8h6v8"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M3 5c3-1 6-1 9 1 3-2 6-2 9-1v14c-3-1-6-1-9 1-3-2-6-2-9-1V5ZM12 6v14"/></symbol>
+    <symbol id="i-graduation" viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5L2 9Zm5 3v5c3 3 7 3 10 0v-5M21 10v7"/></symbol>
+    <symbol id="i-requests" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2c0-3 3-5 6-5s6 2 6 5v2M16 5c4 0 5 6 2 7M18 14c2 1 3 3 3 5v1"/></symbol>
+    <symbol id="i-award" viewBox="0 0 24 24"><path d="M5 3h14v13H5zM8 8h8M8 12h6M8 16l-1 6 5-3 5 3-1-6"/></symbol>
+    <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M9 7V4h6v3M3 13h18"/></symbol>
+    <symbol id="i-org" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M5 17v-5h14v5"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6M17 2v6M3 10h18M8 14h2M13 14h2"/></symbol>
+    <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="2"/><path d="m4 19 6-6 4 4 3-3 4 4"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M5 18h14l-2-3V9a5 5 0 0 0-10 0v6l-2 3ZM10 21h4"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 21h17M7 18V9M12 18V3M17 18v-7"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m10 2-.7 3-2 1-3-.7-2 3 2.3 2-.1 3-2.2 2 2 3 3-.7 2 1L10 22h4l.7-3 2-1 3 .7 2-3-2.3-2v-3l2.3-2-2-3-3 .7-2-1L14 2Z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="7"/><path d="m15 15 6 6"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="m4 17-1 4 4-1 13-13-3-3L4 17ZM15 6l3 3"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M11 3H5v18h6M14 7l5 5-5 5M19 12H9"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></symbol>
+  </svg>
+
+  <section id="authGate" class="auth-page">
+    <div class="auth-card">
+      <div class="brand brand-large"><span class="flame-mark">♨</span><span><strong>SANA AL-AMAR</strong><small>Training, Engineering Inspection & Contracting</small></span></div>
+      <h1>تسجيل دخول الإدارة</h1><p>هذه اللوحة مخصصة لموظفي سنا الإعمار المخوّلين فقط.</p>
+      <form id="loginForm">
+        <label>البريد الإلكتروني<input id="email" type="email" autocomplete="username" required placeholder="name@company.com"></label>
+        <label>كلمة المرور<input id="password" type="password" autocomplete="current-password" required minlength="6" placeholder="••••••••"></label>
+        <button type="submit" class="btn btn-primary btn-full" id="loginButton">دخول لوحة الإدارة</button>
+      </form>
+      <p id="loginMessage" role="alert" class="feedback"></p>
+      <a href="?preview=1" class="demo-link">معاينة شكل اللوحة بدون بيانات أو صلاحيات</a>
+      <small class="auth-note">لا يمكن إنشاء حساب إدارة أو منح الصلاحيات من هذه الصفحة.</small>
+    </div>
+  </section>
+
+  <div id="appShell" class="app-shell hidden">
+    <header class="topbar">
+      <button id="menuToggle" class="icon-button menu-toggle" aria-label="فتح القائمة"><svg><use href="#i-menu"/></svg></button>
+      <div class="brand"><span class="flame-mark">♨</span><span><strong>SANA AL-AMAR</strong><small>Training, Engineering Inspection & Contracting</small></span></div>
+      <div class="topbar-tools">
+        <span id="modeTag" class="mode-tag hidden">معاينة فقط</span>
+        <span class="header-search"><svg><use href="#i-search"/></svg><input id="globalSearch" type="search" placeholder="بحث في الدورات..." aria-label="بحث في الدورات"></span>
+        <span class="notification"><svg><use href="#i-bell"/></svg></span>
+        <span class="avatar">●</span>
+        <span class="user-label"><strong id="staffName">مدير النظام</strong><small id="staffRole">Administrator</small></span>
+        <button id="logoutButton" class="icon-button" aria-label="تسجيل الخروج"><svg><use href="#i-logout"/></svg></button>
+      </div>
+    </header>
+    <aside id="sidebar" class="sidebar">
+      <nav aria-label="القائمة الرئيسية">
+        <button class="nav-item active" data-screen="dashboard"><svg><use href="#i-home"/></svg>الصفحة الرئيسية</button>
+        <button class="nav-item" data-screen="courses"><svg><use href="#i-graduation"/></svg>الدورات التدريبية</button>
+        <button class="nav-item" data-screen="requests"><svg><use href="#i-requests"/></svg>طلبات التسجيل <span id="pendingBadge" class="nav-count hidden">0</span></button>
+        <button class="nav-item" data-screen="trainees"><svg><use href="#i-people"/></svg>المتدربون</button>
+        <button class="nav-item" data-screen="certificates"><svg><use href="#i-award"/></svg>الشهادات</button>
+        <button class="nav-item" data-screen="staff"><svg><use href="#i-people"/></svg>الموظفون</button>
+        <button class="nav-item" data-screen="departments"><svg><use href="#i-org"/></svg>الأقسام</button>
+        <button class="nav-item" data-screen="projects"><svg><use href="#i-briefcase"/></svg>أعمال ومشاريع الشركة</button>
+        <button class="nav-item" data-screen="news"><svg><use href="#i-calendar"/></svg>الأخبار والفعاليات</button>
+        <button class="nav-item" data-screen="banners"><svg><use href="#i-photo"/></svg>البنرات والمحتوى</button>
+        <button class="nav-item" data-screen="notifications"><svg><use href="#i-bell"/></svg>الإشعارات</button>
+        <button class="nav-item" data-screen="reports"><svg><use href="#i-chart"/></svg>التقارير والإحصائيات</button>
+        <button class="nav-item" data-screen="settings"><svg><use href="#i-gear"/></svg>إعدادات النظام</button>
+      </nav>
+      <div class="sidebar-footer"><strong>SANA AL-AMAR</strong><small>Training, Engineering Inspection & Contracting</small></div>
+    </aside>
+    <div class="side-backdrop" id="sideBackdrop"></div>
+    <main class="content">
+      <div id="noticeBox" class="notice-box hidden" role="status"></div>
+      <section id="dashboardScreen" class="screen">
+        <div class="hero"><div><span class="overline">SANA AL-AMAR</span><h1>مرحباً بك في لوحة إدارة سنا الإعمار</h1><p>إدارة شاملة للدورات التدريبية والفحوصات الهندسية والمحتوى والمستخدمين</p></div><div class="hero-graphic" aria-hidden="true">⌁</div></div>
+        <div id="metrics" class="metrics-grid"></div>
+        <div class="dashboard-columns">
+          <div class="panel"><div class="panel-heading"><h2>أحدث الدورات</h2><button class="text-action" data-switch="courses">عرض الكل ←</button></div><div id="latestCourses" class="mini-courses"></div></div>
+          <div class="panel"><div class="panel-heading"><h2>طلبات التسجيل الأخيرة</h2><button class="text-action" data-switch="requests">عرض الكل ←</button></div><div id="recentRequests" class="compact-list"></div></div>
+        </div>
+      </section>
+      <section id="coursesScreen" class="screen hidden">
+        <div class="section-head"><div><h1>الدورات التدريبية</h1><p>إضافة الدورات وتعديلها والتحكم بموعد ظهورها في تطبيق المستخدم</p></div><button class="btn btn-primary" id="addCourse"><svg><use href="#i-plus"/></svg> إضافة دورة جديدة</button></div>
+        <div class="panel toolbar"><label class="search-field"><svg><use href="#i-search"/></svg><input id="courseSearch" type="search" placeholder="ابحث عن دورة..." aria-label="بحث عن دورة"></label><select id="courseFilter" aria-label="تصفية الدورات"><option value="all">كل الدورات</option><option value="published">منشورة</option><option value="draft">مسودات</option></select><button class="btn btn-outline" id="reloadCourses">تحديث</button></div>
+        <div id="courseList" class="course-grid"></div>
+      </section>
+      <section id="requestsScreen" class="screen hidden">
+        <div class="section-head"><div><h1>طلبات التسجيل</h1><p>الطلبات متاحة فقط للمستخدمين المخوّلين بالإدارة</p></div></div>
+        <div class="panel table-scroll"><table class="data-table"><thead><tr><th>#</th><th>اسم المتدرب</th><th>الدورة</th><th>تاريخ الطلب</th><th>الحالة</th></tr></thead><tbody id="requestRows"></tbody></table></div>
+      </section>
+      <section id="placeholderScreen" class="screen hidden"><div class="panel placeholder-panel"><svg><use href="#i-gear"/></svg><h1 id="placeholderTitle">قسم آخر</h1><p>هذا القسم موجود في التصميم المعتمد، وسيتم ربطه عند تنفيذ وحدته. لا تُعرض بيانات تجريبية على أنها حقيقية.</p></div></section>
+    </main>
+  </div>
+
+  <dialog id="courseDialog" class="course-dialog">
+    <form id="courseForm">
+      <div class="dialog-head"><div><h2 id="dialogTitle">إضافة دورة تدريبية</h2><p>احفظ الدورة كمسودة أولاً، ثم انشرها عندما تتأكد من المعلومات.</p></div><button type="button" class="icon-button" id="closeDialog" aria-label="إغلاق"><svg><use href="#i-close"/></svg></button></div>
+      <div class="form-body">
+        <div class="form-grid">
+          <label>اسم الدورة بالعربي <em>*</em><input name="title_ar" required maxlength="200" placeholder="مثال: أساسيات الحفر"></label>
+          <label>اسم الدورة بالإنكليزي<input name="title_en" maxlength="200" placeholder="Drilling Fundamentals"></label>
+          <label>الرابط المختصر <em>*</em><input name="slug" required maxlength="150" placeholder="drilling-fundamentals" pattern="[\u0600-\u06FFa-zA-Z0-9][\u0600-\u06FFa-zA-Z0-9_-]*"></label>
+          <label>نوع الشهادة<select name="certificate_type"><option value="sana_al_amar">شهادة سنا الإعمار</option><option value="international_external">شهادة جهة خارجية</option><option value="other">أخرى</option></select></label>
+          <label class="span-2">نبذة قصيرة<textarea name="short_description_ar" rows="2" maxlength="1400"></textarea></label>
+          <label class="span-2">محاور الدورة<textarea name="outline_ar" rows="4" placeholder="اكتب المحاور، كل محور بسطر منفصل"></textarea></label>
+          <label class="span-2">رابط صورة الغلاف<input name="cover_image_url" type="url" placeholder="https://..." pattern="https://.+"></label>
+          <label>سنة التدريب <em>*</em><input name="training_year" type="number" min="2000" max="2100" required></label>
+          <label>طريقة التقديم<select name="delivery_mode"><option value="in_person">حضوري</option><option value="online">أونلاين</option><option value="hybrid">مدمج</option></select></label>
+          <label>مدة الدورة بالأيام<input name="duration_days" type="number" min="1" max="365" placeholder="اختياري"></label>
+          <label>مدة الدورة بالساعات<input name="duration_hours" type="number" min="0.5" max="2000" step="0.5" placeholder="اختياري"></label>
+          <label>عدد المقاعد<input name="seat_capacity" type="number" min="1" max="100000" placeholder="اختياري"></label>
+          <label>نمط التسجيل<select name="audience_scope"><option value="individual">أفراد</option><option value="corporate_contract">عقود شركات</option></select></label>
+          <label class="span-2">الفئة المستهدفة<textarea name="target_audience_ar" rows="2"></textarea></label>
+          <label class="check-row span-2"><input type="checkbox" name="is_featured"> عرض الدورة ضمن الدورات المميزة عند نشرها</label>
+        </div>
+      </div>
+      <div class="dialog-footer"><p id="formMessage" role="alert" class="feedback"></p><button type="button" class="btn btn-outline" id="cancelDialog">إلغاء</button><button type="submit" class="btn btn-primary" id="saveCourse">حفظ المسودة</button></div>
+    </form>
+  </dialog>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
