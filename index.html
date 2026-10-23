@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#092b47">
-<meta http-equiv="refresh" content="0;url=./admin/index.html">
+
 <title>SANA AL-AMAR | لوحة الإدارة</title>
 <style>
 body{min-height:100vh;display:flex;align-items:center;justify-content:center;box-sizing:border-box;margin:0;padding:24px;text-align:center;background:#f5f8fb;color:#10324d;font-family:Tahoma,Arial,sans-serif}
@@ -14,5 +14,13 @@ main{max-width:540px}h1{font-size:25px;margin-bottom:8px}p{line-height:1.8}a{dis
 </head>
 <body>
 <main><h1>SANA AL-AMAR</h1><p>لوحة إدارة سنا الإعمار</p><p>سيتم تحويلك إلى شاشة تسجيل الدخول. إذا لم تنتقل تلقائياً، اضغط الزر التالي:</p><a href="./admin/index.html">فتح لوحة الإدارة</a></main>
-<script>window.location.replace('./admin/index.html'+window.location.search)</script>
+<script>
+(function(){
+  const params=new URLSearchParams(location.search);
+  const fragment=new URLSearchParams(location.hash.slice(1));
+  const recovery=params.get("type")==="recovery" || fragment.get("type")==="recovery" || params.has("token_hash") || fragment.has("error");
+  const target=recovery?"./reset-password.html":"./admin/index.html";
+  window.location.replace(target+location.search+location.hash);
+})();
+</script>
 </body></html>
