@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="index,follow"><meta name="theme-color" content="#0c3152">
+<title>طلب التسجيل بالدورات | SANA AL-AMAR</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f2f6fa;color:#13364f;font:15px Tahoma,Arial,sans-serif}
+header{padding:24px;text-align:center;background:white;border-bottom:1px solid #dce7f0}
+.brand{direction:ltr;color:#0b3153;font-weight:bold;font-size:25px}.brand b{color:#e52820}
+small{display:block;font-size:10px;font-weight:normal;color:#7991a4}
+main{max-width:800px;margin:28px auto;padding:0 16px}
+.hero{background:linear-gradient(120deg,#092c4c,#23618a);color:white;padding:32px;border-radius:18px 18px 0 0}
+h1{margin:0;font-size:26px}p{line-height:1.9}
+form{padding:29px;background:white;border-radius:0 0 18px 18px;box-shadow:0 12px 35px #123a5b14}
+label{display:block;font-weight:bold;margin:0 0 17px;font-size:14px}
+input,select,textarea{width:100%;margin-top:9px;display:block;padding:13px;border:1px solid #d6e2eb;border-radius:10px;font:inherit;background:#fff;color:#153754}
+textarea{min-height:90px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
+button{background:#f37121;color:white;padding:15px 24px;border:0;border-radius:9px;font-size:15px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+#status{font-size:13px;color:#4b677d}#status.error{color:#ad342b}#status.ok{color:#16714d}
+.note{font-size:12px;color:#7790a2}.hidden{position:absolute;left:-99999px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}form{padding:22px}.hero{padding:25px}button{width:100%}}
+</style></head><body>
+<header><div class="brand"><b>♨</b> SANA AL-AMAR<small>Training, Engineering Inspection &amp; Contracting</small></div></header>
+<main><div class="hero"><h1>طلب التسجيل بالدورات التدريبية</h1>
+<p>اختر الدورة وقدّم طلب اهتمامك. سيقوم فريق سنا الإعمار بمراجعته والتواصل معك. إرسال الطلب لا يعني تأكيد المقعد.</p></div>
+<form id="form">
+<label>الدورة المطلوبة *<select id="course" required disabled><option value="">جارٍ التحميل...</option></select></label>
+<div class="grid"><label>الاسم الكامل *<input id="fullName" required minlength="3" maxlength="120" autocomplete="name"></label>
+<label>رقم الهاتف *<input id="phone" required type="tel" inputmode="tel" minlength="7" maxlength="22" autocomplete="tel" placeholder="07xxxxxxxxx"></label>
+<label>البريد الإلكتروني (اختياري)<input id="email" type="email" maxlength="160" autocomplete="email"></label>
+<label>الجهة أو الشركة (اختياري)<input id="org" maxlength="150" autocomplete="organization"></label></div>
+<label>ملاحظات (اختياري)<textarea id="notes" maxlength="1000"></textarea></label>
+<div class="hidden" aria-hidden="true"><label>Website<input id="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+<button type="submit" id="send" disabled>إرسال طلب التسجيل</button>
+<p class="note">تستخدم البيانات لغرض التواصل والمتابعة، ولا تظهر للزوار.</p>
+<p id="status" role="status" aria-live="polite"></p></form></main>
+<script>
+(()=>{
+"use strict";
+const url="https://sseugkalnlclovwhxiys.supabase.co";
+const key="sb_publishable_NPfWrDpXNNlob6YzG0EGJg_KRFDmz0O";
+const el=id=>document.getElementById(id);
+const picker=el("course"),send=el("send"),status=el("status"),form=el("form");
+let available=[],busy=false;
+function msg(v,kind=""){status.className=kind;status.textContent=v}
+async function api(path,opts={}){
+const r=await fetch(url+path,{...opts,cache:"no-store",headers:{"apikey":key,"Content-Type":"application/json",...(opts.headers||{})}});
+const result=await r.json().catch(()=>null);
+if(!r.ok)throw Error(result?.message||result?.msg||"تعذّر الاتصال بالخدمة");
+return result;
+}
+async function load(){
+try{
+const [cs,os]=await Promise.all([
+api("/rest/v1/courses?select=id,title_ar,is_published&is_published=eq.true&order=sort_order.asc"),
+api("/rest/v1/course_year_offerings?select=course_id&is_published=eq.true")
+]);
+const ids=new Set(os.map(o=>String(o.course_id)));available=cs.filter(c=>ids.has(String(c.id)));
+picker.replaceChildren();picker.add(new Option(available.length?"اختر الدورة":"لا توجد دورات منشورة حالياً",""));
+for(const c of available)picker.add(new Option(c.title_ar,String(c.id)));
+if(available.length){picker.disabled=false;send.disabled=false;msg("");const chosen=new URLSearchParams(location.search).get("course_id");if(available.some(c=>String(c.id)===chosen))picker.value=chosen}
+else msg("لا توجد دورات مفتوحة للتسجيل حالياً. حاول لاحقاً.");
+}catch(e){msg("تعذّر تحميل الدورات: "+e.message,"error")}
+}
+form.addEventListener("submit",async ev=>{
+ev.preventDefault();if(busy)return;
+const id=picker.value,name=el("fullName").value.trim(),phone=el("phone").value.trim(),email=el("email").value.trim();
+if(!available.some(c=>String(c.id)===id)){msg("اختَر دورة منشورة.","error");return}
+if(name.length<3||!/^[-+0-9() ]{7,22}$/.test(phone)){msg("راجع الاسم ورقم الهاتف.","error");return}
+if(email&&!el("email").checkValidity()){msg("راجع البريد الإلكتروني.","error");return}
+if(el("website").value){msg("تعذّر إرسال الطلب.","error");return}
+busy=true;send.disabled=true;msg("جارٍ إرسال الطلب...");
+try{
+await api("/rest/v1/registration_requests",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify({
+course_id:Number(id),full_name:name,phone,email:email||null,
+organization:el("org").value.trim()||null,notes:el("notes").value.trim()||null,status:"new"
+})});
+form.reset();msg("تم إرسال طلب التسجيل. الطلب قيد المراجعة، وسيتواصل معك الفريق عند المتابعة.","ok");
+}catch(e){msg("تعذّر إرسال الطلب: "+e.message,"error")}
+finally{busy=false;send.disabled=!available.length}
+});
+load();
+})();
+</script></body></html>
