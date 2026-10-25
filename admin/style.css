@@ -66,7 +66,7 @@ input:focus,select:focus,textarea:focus{border-color:#1a86d7;box-shadow:0 0 0 3p
 .course-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;color:#55728b;font-size:11px;margin-bottom:15px}
 .status-pill{display:inline-flex;border-radius:40px;font-size:10px;font-weight:800;padding:4px 9px}
 .status-pill.published{background:#e5f9ed;color:#138054}.status-pill.draft{background:#fff1df;color:#b16b1a}
-.card-foot{display:flex;gap:8px;border-top:1px solid #edf2f7;padding-top:11px;align-items:center;flex-wrap:wrap}.card-foot .btn{font-size:11px;padding:8px 10px}.card-foot .btn svg{width:14px;height:14px}
+.card-foot{display:flex;gap:8px;border-top:1px solid #edf2f7;padding-top:11px;align-items:center;flex-wrap:wrap}.card-foot .btn{font-size:11px;padding:8px 10px}.card-foot .btn svg{width:14px;height:14px}.card-foot .btn-delete-draft{background:#fff;color:#a43b38;border:1px solid #dfaaa8}.card-foot .btn-delete-draft:hover{background:#fff2f2;border-color:#c77b77}
 .empty-state{border:1px dashed #cddce8;border-radius:14px;padding:50px 18px;color:#698195;text-align:center;background:#fff;grid-column:1/-1}
 .empty-state svg{width:46px;height:46px;display:block;margin:0 auto 10px;color:#b5c8d8}
 .data-table{width:100%;border-collapse:collapse;white-space:nowrap;text-align:right;font-size:12px}
