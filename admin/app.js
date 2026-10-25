@@ -15,6 +15,47 @@ const intOrNull=v=>v===""||v==null?null:Number(v);
 const stateLabels={new:"قيد المراجعة",contacted:"تم التواصل",confirmed:"مؤكدة",completed:"مكتملة",cancelled:"ملغاة",rejected:"مرفوضة"};
 let session=null,currentUser=null,courses=[],offerings=[],registrations=[],trainees=[],editingId=null,editingTraineeId=null,filter="";
 let screen="dashboard";
+let pendingCourseCover=null,courseCoverObjectUrl=null;
+const COURSE_COVER_MAX_BYTES=5*1024*1024;
+const COURSE_COVER_TYPES={"image/jpeg":"jpg","image/png":"png","image/webp":"webp"};
+function resetCourseCover(){
+  pendingCourseCover=null;
+  $("courseCoverFile").value="";
+  if(courseCoverObjectUrl){URL.revokeObjectURL(courseCoverObjectUrl);courseCoverObjectUrl=null}
+}
+function previewCourseCover(url){
+  const preview=$("courseCoverPreview"),img=$("courseCoverPreviewImg"),hint=$("courseCoverHint");
+  const src=url&&(url.startsWith("blob:")||imgSrc(url))?url:"";
+  preview.classList.toggle("hidden",!src);
+  if(src)img.src=src;else img.removeAttribute("src");
+  hint.textContent=pendingCourseCover?"الصورة محددة، سيتم رفعها عند حفظ الدورة.":"";
+}
+function onCourseCoverFile(){
+  const file=$("courseCoverFile").files?.[0];
+  if(!file){resetCourseCover();previewCourseCover(text($("courseForm").elements.namedItem("cover_image_url").value));return}
+  if(!Object.hasOwn(COURSE_COVER_TYPES,file.type)||!file.size||file.size>COURSE_COVER_MAX_BYTES){
+    resetCourseCover();previewCourseCover(text($("courseForm").elements.namedItem("cover_image_url").value));
+    $("formMessage").textContent="اختر صورة JPG أو PNG أو WebP، بحجم لا يتجاوز 5 ميغابايت.";return;
+  }
+  resetCourseCover();
+  pendingCourseCover=file;
+  courseCoverObjectUrl=URL.createObjectURL(file);
+  $("formMessage").textContent="";
+  previewCourseCover(courseCoverObjectUrl);
+}
+async function uploadCourseCover(file){
+  if(!Object.hasOwn(COURSE_COVER_TYPES,file.type)||!file.size||file.size>COURSE_COVER_MAX_BYTES)
+    throw new Error("الصورة غير مدعومة أو أكبر من 5 ميغابايت.");
+  const name=crypto.randomUUID()+"."+COURSE_COVER_TYPES[file.type];
+  const path="courses/"+name;
+  await http("/storage/v1/object/course-covers/"+path,{
+    method:"POST",
+    headers:{"Content-Type":file.type,"cache-control":"3600","x-upsert":"false"},
+    body:file
+  });
+  return CONFIG.url+"/storage/v1/object/public/course-covers/"+path;
+}
+
 const pendingDraftDeletes=new Map();
 let draftUndoTicker=null;
 function displayedCourses(){return courses.filter(c=>!pendingDraftDeletes.has(String(c.id)))}
@@ -292,7 +333,7 @@ function showScreen(next){
 }
 function openCourse(id=null){
   if(PREVIEW){setNotice("وضع المعاينة لا يسمح بتغيير البيانات. يتطلب الحفظ حساب إدارة مخوّلاً.");return}
-  editingId=id;const form=$("courseForm");form.reset();$("formMessage").textContent="";
+  editingId=id;const form=$("courseForm");form.reset();resetCourseCover();$("formMessage").textContent="";
   const c=courses.find(row=>String(row.id)===String(id));
   $("saveCourse").textContent=c?"حفظ التعديلات":"حفظ المسودة";
   form.elements.namedItem("slug").dataset.manual=c?"1":"";
@@ -301,6 +342,7 @@ function openCourse(id=null){
   const fieldMap={title_ar:c?.title_ar,title_en:c?.title_en,slug:c?.slug,short_description_ar:c?.short_description_ar,outline_ar:c?.outline_ar,cover_image_url:c?.cover_image_url,certificate_type:c?.certificate_type||"sana_al_amar",training_year:o?.training_year||new Date().getFullYear(),delivery_mode:o?.delivery_mode||"in_person",duration_days:o?.duration_days,duration_hours:o?.duration_hours,seat_capacity:o?.seat_capacity,target_audience_ar:o?.target_audience_ar,audience_scope:o?.audience_scope||"individual"};
   Object.entries(fieldMap).forEach(([key,val])=>{if(form.elements.namedItem(key))form.elements.namedItem(key).value=val??""});
   form.elements.namedItem("is_featured").checked=!!c?.is_featured;
+  previewCourseCover(text(c?.cover_image_url));
   $("courseDialog").showModal();
 }
 async function submitCourse(event){
@@ -315,6 +357,11 @@ async function submitCourse(event){
   const offeringData={training_year:year,delivery_mode:value("delivery_mode"),duration_days:intOrNull(value("duration_days")),duration_hours:intOrNull(value("duration_hours")),seat_capacity:intOrNull(value("seat_capacity")),target_audience_ar:value("target_audience_ar")||null,audience_scope:value("audience_scope")};
   const saveButton=$("saveCourse");saveButton.disabled=true;$("formMessage").textContent="جارٍ الحفظ...";
   try{
+    if(pendingCourseCover){
+      $("formMessage").textContent="جارٍ رفع صورة الغلاف...";
+      courseData.cover_image_url=await uploadCourseCover(pendingCourseCover);
+    }
+    $("formMessage").textContent="جارٍ حفظ الدورة...";
     let saved;
     if(editingId){
       const rows=await http("/rest/v1/courses?id=eq."+encodeURIComponent(editingId),{method:"PATCH",headers:{Prefer:"return=representation"},body:JSON.stringify(courseData)});saved=rows?.[0];
@@ -327,8 +374,8 @@ async function submitCourse(event){
       method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},
       body:JSON.stringify({...offeringData,course_id:saved.id,is_published:pastOffering?.is_published||false})
     });
-    $("courseDialog").close();await listData();
-    showScreen("courses");setNotice("تم حفظ بيانات الدورة. تبقى المسودة مخفية عن المستخدمين لحين نشرها.");
+    $("courseDialog").close();resetCourseCover();await listData();
+    showScreen("courses");setNotice("تم حفظ بيانات الدورة وصورة الغلاف إن تم اختيارها. لا تتغير حالة النشر تلقائياً.");
   }catch(error){$("formMessage").textContent="تعذّر حفظ الدورة: "+error.message}
   finally{saveButton.disabled=false}
 }
@@ -432,8 +479,13 @@ function bindUI(){
     if(undo)undoDraftDelete(undo.dataset.undo);
   });
   $("courseForm").addEventListener("submit",submitCourse);
-  $("closeDialog").addEventListener("click",()=>$("courseDialog").close());
-  $("cancelDialog").addEventListener("click",()=>$("courseDialog").close());
+  $("closeDialog").addEventListener("click",()=>{$("courseDialog").close();resetCourseCover()});
+  $("cancelDialog").addEventListener("click",()=>{$("courseDialog").close();resetCourseCover()});
+  $("courseCoverFile").addEventListener("change",onCourseCoverFile);
+  $("courseForm").elements.namedItem("cover_image_url").addEventListener("input",e=>{
+    if(pendingCourseCover)resetCourseCover();
+    previewCourseCover(text(e.target.value));
+  });
   $("courseForm").elements.namedItem("title_ar").addEventListener("input",e=>{
     const slug=$("courseForm").elements.namedItem("slug");if(!editingId&&!slug.dataset.manual)slug.value=slugify(e.target.value);
   });
