@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#082b4a">
   <meta name="description" content="لوحة إدارة سنا الإعمار للدورات والتسجيلات.">
   <title>SANA AL-AMAR | لوحة الإدارة</title>
-  <link rel="stylesheet" href="./style.css?v=20261025-cover-upload-1">
+  <link rel="stylesheet" href="./style.css?v=20261025-archive-1">
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="icon-sprite" aria-hidden="true">
@@ -91,7 +91,7 @@
       </section>
       <section id="coursesScreen" class="screen hidden">
         <div class="section-head"><div><h1>الدورات التدريبية</h1><p>إضافة الدورات وتعديلها والتحكم بموعد ظهورها في تطبيق المستخدم</p></div><button class="btn btn-primary" id="addCourse"><svg><use href="#i-plus"/></svg> إضافة دورة جديدة</button></div>
-        <div class="panel toolbar"><label class="search-field"><svg><use href="#i-search"/></svg><input id="courseSearch" type="search" placeholder="ابحث عن دورة..." aria-label="بحث عن دورة"></label><select id="courseFilter" aria-label="تصفية الدورات"><option value="all">كل الدورات</option><option value="published">منشورة</option><option value="draft">مسودات</option></select><button class="btn btn-outline" id="reloadCourses">تحديث</button></div>
+        <div class="panel toolbar"><label class="search-field"><svg><use href="#i-search"/></svg><input id="courseSearch" type="search" placeholder="ابحث عن دورة..." aria-label="بحث عن دورة"></label><select id="courseFilter" aria-label="تصفية الدورات"><option value="all">كل الدورات</option><option value="published">منشورة</option><option value="draft">مسودات</option><option value="archived">المؤرشفة</option></select><button class="btn btn-outline" id="reloadCourses">تحديث</button></div>
         <div id="courseList" class="course-grid"></div>
       </section>
       <section id="requestsScreen" class="screen hidden">
@@ -162,6 +162,6 @@
     <div class="dialog-footer"><button type="button" class="btn btn-outline" id="dismissRequestDialog">إغلاق</button><button type="button" class="btn btn-primary" id="approveTraineeButton">إضافة / ربط بملف متدرب</button></div>
   </dialog>
   <div id="draftUndoStack" class="draft-undo-stack" aria-label="التراجع عن حذف المسودات"></div>
-  <script type="module" src="./app.js?v=20261025-cover-upload-1"></script>
+  <script type="module" src="./app.js?v=20261025-archive-1"></script>
 </body>
 </html>
