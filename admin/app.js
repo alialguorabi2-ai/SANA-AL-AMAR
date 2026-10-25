@@ -15,6 +15,43 @@ const intOrNull=v=>v===""||v==null?null:Number(v);
 const stateLabels={new:"قيد المراجعة",contacted:"تم التواصل",confirmed:"مؤكدة",completed:"مكتملة",cancelled:"ملغاة",rejected:"مرفوضة"};
 let session=null,currentUser=null,courses=[],offerings=[],registrations=[],editingId=null,filter="";
 let screen="dashboard";
+const pendingDraftDeletes=new Map();
+let draftUndoTicker=null;
+function displayedCourses(){return courses.filter(c=>!pendingDraftDeletes.has(String(c.id)))}
+function renderUndoStack(){
+  const stack=$("draftUndoStack");if(!stack)return;
+  const now=Date.now();
+  stack.innerHTML=[...pendingDraftDeletes.entries()].map(([id,item])=>{
+    const seconds=Math.max(0,Math.ceil((item.deadline-now)/1000));
+    const deleting=item.state==="deleting";
+    return '<div class="draft-undo-item"><div class="draft-undo-text"><strong>'+escapeHTML(item.course.title_ar)+'</strong><span>'+(deleting?"جارٍ إتمام حذف المسودة...":"سيتم الحذف النهائي بعد "+seconds+" ثوانٍ")+'</span></div>'+(deleting?"":'<button type="button" class="draft-undo-button" data-undo="'+escapeHTML(id)+'">تراجع</button>')+'</div>';
+  }).join("");
+}
+function refreshDraftUndoTicker(){
+  if(pendingDraftDeletes.size&&!draftUndoTicker){
+    draftUndoTicker=setInterval(()=>{
+      for(const [id,item] of pendingDraftDeletes){
+        if(item.state==="undoable"&&Date.now()>=item.deadline)void commitDraftDelete(id);
+      }
+      renderUndoStack();
+    },250);
+  }else if(!pendingDraftDeletes.size&&draftUndoTicker){
+    clearInterval(draftUndoTicker);draftUndoTicker=null;
+  }
+}
+function undoDraftDelete(id){
+  const item=pendingDraftDeletes.get(String(id));
+  if(!item||item.state!=="undoable")return;
+  if(Date.now()>=item.deadline){void commitDraftDelete(String(id));return}
+  clearTimeout(item.timer);pendingDraftDeletes.delete(String(id));
+  refreshDraftUndoTicker();renderUndoStack();renderAll();
+  setNotice("تم التراجع عن حذف المسودة: "+item.course.title_ar);
+}
+function cancelPendingOnLogout(){
+  for(const item of pendingDraftDeletes.values())clearTimeout(item.timer);
+  pendingDraftDeletes.clear();refreshDraftUndoTicker();renderUndoStack();
+}
+
 const sampleCourse={id:"demo-1",title_ar:"دورة تجريبية لمعاينة التصميم",title_en:"Design Preview Course",slug:"design-preview",short_description_ar:"هذا مثال بصري فقط وليس دورة منشورة أو مسجّلة فعلياً.",is_published:false,is_featured:false,cover_image_url:null,created_at:"2026-10-23T12:00:00Z"};
 const headers=(token=session?.access_token)=>({
   apikey:CONFIG.publishableKey,
@@ -106,13 +143,14 @@ function coverHTML(row){
 }
 function requestName(r){const c=courses.find(v=>String(v.id)===String(r.course_id));return c?.title_ar||"الدورة غير متاحة"}
 function renderDashboard(){
+  const shownCourses=displayedCourses();
   $("metrics").innerHTML=[
-    metric("إجمالي الدورات",courses.length,"","graduation"),
-    metric("الدورات المنشورة",courses.filter(x=>x.is_published).length,"green","book"),
-    metric("مسودات الدورات",courses.filter(x=>!x.is_published).length,"orange","edit"),
+    metric("إجمالي الدورات",shownCourses.length,"","graduation"),
+    metric("الدورات المنشورة",shownCourses.filter(x=>x.is_published).length,"green","book"),
+    metric("مسودات الدورات",shownCourses.filter(x=>!x.is_published).length,"orange","edit"),
     metric("طلبات بانتظار المراجعة",registrations.filter(x=>x.status==="new").length,"red","requests")
   ].join("");
-  const latest=courses.slice(0,3);
+  const latest=shownCourses.slice(0,3);
   $("latestCourses").innerHTML=latest.length?latest.map(c=>
     '<article class="mini-card">'+coverHTML(c)+'<div class="caption"><h3>'+escapeHTML(c.title_ar)+'</h3><small>'+statusLabel(c.is_published)+'</small></div></article>'
   ).join(""):empty("لا توجد دورات محفوظة حتى الآن");
@@ -126,7 +164,7 @@ function empty(message){return '<div class="empty-state">'+icon("book")+'<p>'+es
 function renderCourses(){
   const term=($("courseSearch").value||$("globalSearch").value||"").toLocaleLowerCase();
   const selected=$("courseFilter").value;
-  const filtered=courses.filter(c=>(selected==="all"||(selected==="published"&&c.is_published)||(selected==="draft"&&!c.is_published))&&
+  const filtered=displayedCourses().filter(c=>(selected==="all"||(selected==="published"&&c.is_published)||(selected==="draft"&&!c.is_published))&&
     [c.title_ar,c.title_en,c.slug].some(v=>text(v).toLocaleLowerCase().includes(term)));
   $("courseList").innerHTML=filtered.length?filtered.map(c=>{
     const o=offeringFor(c.id);
@@ -213,21 +251,35 @@ async function deleteDraft(id){
   if(PREVIEW||currentUser?.app_metadata?.sana_role!=="admin"){
     setNotice("حذف المسودات متاح للمدير فقط.",true);return;
   }
-  const course=courses.find(c=>String(c.id)===String(id));
+  const key=String(id),course=courses.find(c=>String(c.id)===key);
   if(!course||course.is_published){
     setNotice("يمكن حذف المسودات غير المنشورة فقط.",true);return;
   }
-  if(!window.confirm('هل تريد حذف مسودة "'+course.title_ar+'" نهائياً؟\\nلا يمكن التراجع عن هذا الإجراء.'))return;
-  const button=[...document.querySelectorAll("[data-delete]")].find(b=>b.dataset.delete===String(id));
-  if(button)button.disabled=true;
+  if(pendingDraftDeletes.has(key))return;
+  if(!window.confirm('حذف مسودة "'+course.title_ar+'"؟\\nيمكنك التراجع خلال 10 ثوانٍ، وبعدها يتم الحذف النهائي.'))return;
+  const item={course,deadline:Date.now()+10000,state:"undoable",timer:null};
+  pendingDraftDeletes.set(key,item);
+  item.timer=setTimeout(()=>void commitDraftDelete(key),10000);
+  renderAll();renderUndoStack();refreshDraftUndoTicker();
+}
+async function commitDraftDelete(id){
+  const key=String(id),item=pendingDraftDeletes.get(key);
+  if(!item||item.state!=="undoable")return;
+  item.state="deleting";clearTimeout(item.timer);renderUndoStack();
   try{
-    const deleted=await http("/rest/v1/courses?id=eq."+encodeURIComponent(id)+"&is_published=eq.false",{
+    const deleted=await http("/rest/v1/courses?id=eq."+encodeURIComponent(key)+"&is_published=eq.false",{
       method:"DELETE",headers:{Prefer:"return=representation"}
     });
     if(!Array.isArray(deleted)||deleted.length!==1)throw new Error("لم تُحذف المسودة؛ تحقق من الصلاحية وحالة الدورة.");
-    await listData();showScreen("courses");setNotice("تم حذف مسودة الدورة: "+course.title_ar);
+    courses=courses.filter(c=>String(c.id)!==key);
+    pendingDraftDeletes.delete(key);
+    refreshDraftUndoTicker();renderUndoStack();
+    await listData();renderAll();
+    setNotice("تم حذف مسودة الدورة نهائياً: "+item.course.title_ar);
   }catch(error){
-    await listData();setNotice("تعذر حذف المسودة: "+error.message,true);
+    pendingDraftDeletes.delete(key);refreshDraftUndoTicker();renderUndoStack();
+    await listData();renderAll();
+    setNotice("تعذر حذف المسودة: "+error.message,true);
   }
 }
 async function updateRequest(id,status){
@@ -240,6 +292,7 @@ async function updateRequest(id,status){
   }catch(error){setNotice("تعذر تعديل حالة الطلب: "+error.message,true);await listData();}
 }
 async function logout(){
+  cancelPendingOnLogout();
   const token=session?.access_token;
   if(token&&!PREVIEW){
     try{
@@ -271,6 +324,10 @@ function bindUI(){
   $("courseList").addEventListener("click",e=>{
     const edit=e.target.closest("[data-edit]"),publish=e.target.closest("[data-publish]"),remove=e.target.closest("[data-delete]");
     if(edit)openCourse(edit.dataset.edit);else if(publish)setPublished(publish.dataset.publish);else if(remove)deleteDraft(remove.dataset.delete);
+  });
+  $("draftUndoStack").addEventListener("click",e=>{
+    const undo=e.target.closest("[data-undo]");
+    if(undo)undoDraftDelete(undo.dataset.undo);
   });
   $("courseForm").addEventListener("submit",submitCourse);
   $("closeDialog").addEventListener("click",()=>$("courseDialog").close());
