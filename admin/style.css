@@ -95,3 +95,20 @@ input:focus,select:focus,textarea:focus{border-color:#1a86d7;box-shadow:0 0 0 3p
 .draft-undo-text{display:flex;flex-direction:column;gap:4px;min-width:0;font-size:12px}.draft-undo-text strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:285px}.draft-undo-text span{color:#c8d9e5;font-size:11px}
 .draft-undo-button{white-space:nowrap;padding:8px 13px;background:#fff;color:#0b3c58;font-size:12px;font-weight:800;border:0;border-radius:8px}.draft-undo-button:hover,.draft-undo-button:focus-visible{background:#d6ecfa}
 @media(max-width:560px){.draft-undo-stack{left:12px;right:12px;width:auto}.draft-undo-text strong{max-width:200px}}
+
+/* Trainee register and registration-requests management */
+.registry-toolbar{margin-bottom:10px}.registry-count{font-size:12px;color:#60798e;margin:0 0 12px;padding-inline:4px}
+.registry-toolbar .search-field{min-width:180px}.data-table .btn-small{font-size:11px;padding:7px 10px;white-space:nowrap}
+.data-table td{vertical-align:middle}.data-table td strong{color:#173a52;font-size:12px}
+.no-results{text-align:center;padding:36px 12px!important;color:#70899c;white-space:normal}
+.registry-dialog .form-body{max-height:65vh}.trainee-history{margin-top:18px;border-top:1px solid #e5eef4;padding-top:14px}
+.trainee-history h3{font-size:14px;margin:0 0 12px}.muted{font-size:12px;color:#71899b}
+.trainee-history-row{display:flex;align-items:center;gap:10px;justify-content:space-between;border-top:1px solid #eef3f7;padding:10px 0;font-size:12px;flex-wrap:wrap}
+.trainee-history-row:first-of-type{border-top:0}.trainee-history-row small{color:#72899b}
+.request-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.request-field{padding:11px 13px;background:#f8fafc;border:1px solid #e6edf3;border-radius:9px;min-width:0}
+.request-field small{display:block;color:#6f8799;margin-bottom:6px;font-size:11px}
+.request-field strong{display:block;font-size:13px;color:#1a405d;overflow-wrap:anywhere}
+.request-field.wide{grid-column:1/-1}.request-field .multiline{white-space:pre-wrap;font-weight:500;line-height:1.8}
+.registry-link-state{font-size:12px;background:#eef6fb;padding:10px 12px;border-radius:8px;margin-top:15px;color:#315c79}
+@media(max-width:560px){.registry-toolbar{display:flex;flex-wrap:wrap}.registry-toolbar .search-field{flex-basis:100%}.request-detail-grid{grid-template-columns:1fr}}
