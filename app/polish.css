@@ -1,0 +1,25 @@
+/* Approved-reference refinements, 2026-10-25 */
+:root{--orange:#fc6a14;--navy:#0b3151}
+.app{background:#fff}
+.app-header{box-shadow:0 1px 0 #edf0f3}
+.header-logo{object-fit:contain}
+.hero{box-shadow:0 5px 18px #18384b1b}
+.hero-img{background:linear-gradient(120deg,#0c3455,#226880)}
+.quick button{transition:transform .15s}
+.quick button:active,.section-row:active,.course-card button:active,.nav button:active{transform:scale(.97)}
+.course-card{transition:box-shadow .2s}
+.course-card:hover{box-shadow:0 8px 22px #15334d22}
+.course-card.empty-preview{background:#fff}
+.empty-disclaimer{grid-column:1/-1;font-size:10px;line-height:1.7;color:#788795;margin:0 0 7px}
+.course-image img[src*="sana-logo.png"]{padding:18px;object-fit:contain;background:linear-gradient(125deg,#ecf1f5,#fff)}
+.detail-photo[src*="sana-logo.png"]{object-fit:contain;padding:32px;background:linear-gradient(125deg,#edf2f5,#fff)}
+.fallback-logo{object-fit:contain!important;background:linear-gradient(115deg,#eff4f7,#fff)!important;padding:15px}
+.section-row img.fallback-logo{padding:16px}
+.hero-img.fallback-logo{object-fit:contain!important;background:linear-gradient(120deg,#183e5c,#31728b)!important;filter:brightness(.9)}
+.hero:has(.hero-img.fallback-logo):after{background:linear-gradient(0deg,#071d2cb3 0%,transparent 70%)}
+.card-empty{line-height:1.8}
+.detail-content p{overflow-wrap:anywhere}
+.info-note{margin-bottom:20px}
+@media(max-width:390px){.quick{gap:6px}.quick button{font-size:9px}.quick .tile{width:46px;height:46px}.section-row img{width:38%}.detail-meta{gap:12px}}
+@media(min-width:480px){.app{border-inline:1px solid #edf0f2}}
+@media(prefers-reduced-motion:reduce){.quick button,.course-card{transition:none}}
