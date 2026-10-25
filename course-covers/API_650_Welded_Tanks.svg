@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+<defs>
+<linearGradient id="light" x2="1" y2="1"><stop stop-color="#ffffff"/><stop offset=".62" stop-color="#eff5fb"/><stop offset="1" stop-color="#cbdeed"/></linearGradient>
+<linearGradient id="metal" x2="1" y2=".3"><stop stop-color="#c9dfe8"/><stop offset=".27" stop-color="#799bb0"/><stop offset=".56" stop-color="#e6f0f4"/><stop offset=".86" stop-color="#617f97"/><stop offset="1" stop-color="#cbdde6"/></linearGradient>
+<radialGradient id="glow"><stop stop-color="#f88638" stop-opacity=".5"/><stop offset="1" stop-color="#f88638" stop-opacity="0"/></radialGradient>
+<pattern id="grid" width="39" height="39" patternUnits="userSpaceOnUse"><path d="M39 0H0V39" stroke="#8fb6cb" stroke-width="1" fill="none" opacity=".23"/></pattern>
+<clipPath id="right"><path d="M613 0H1200V675H470Q633 520 584 340Q546 203 613 0"/></clipPath>
+</defs>
+<rect width="1200" height="675" fill="url(#light)"/>
+<g clip-path="url(#right)"><rect x="550" width="650" height="675" fill="#093854"/><rect x="550" width="650" height="675" fill="url(#grid)"/><circle cx="987" cy="260" r="340" fill="url(#glow)"/><g transform="translate(90 5)"><ellipse cx="910" cy="582" rx="225" ry="34" fill="#011b2b" opacity=".45"/>
+<path d="M729 257 Q904 176 1085 256 L1085 517 Q901 585 729 519Z" fill="url(#metal)" stroke="#124461" stroke-width="8"/><ellipse cx="908" cy="257" rx="179" ry="57" fill="#cfdee8" stroke="#1f4b69" stroke-width="9"/><path d="M730 338 Q907 400 1084 339 M730 423Q906 486 1085 423" fill="none" stroke="#375e79" stroke-width="5" opacity=".65"/>
+<path d="M1038 245V523M1045 288H1080M1045 347H1080M1045 407H1080M1045 467H1080" stroke="#f5a650" stroke-width="7"/>
+<path d="M790 197V170H991V198" stroke="#f6b46b" stroke-width="8" fill="none"/><path d="M825 196V173M865 196V173M906 196V173M950 196V173" stroke="#f6b46b" stroke-width="4"/>
+<path d="M760 225L794 159" stroke="#f0f4fa" stroke-width="7"/></g></g>
+<path d="M612 0Q545 200 584 340Q633 520 470 675" stroke="#fff" stroke-width="12" fill="none"/>
+<path d="M650 0Q589 186 633 362Q667 523 518 675" stroke="#fa671f" stroke-width="13" fill="none"/>
+<g transform="translate(48 34)">
+<path d="M48 11 L57 17 L70 14 L72 27 L85 33 L78 45 L82 58 L69 66 L64 78 L50 76 L38 81 L28 71 L13 69 L11 56 L2 46 L10 34 L9 20 L23 17 L32 7Z" fill="#082b48"/>
+<path d="M48 19 Q79 51 59 67 Q48 75 37 65 Q45 58 47 47 Q43 37 48 19Z" fill="#fb671f"/><path d="M31 31 Q14 56 28 67 Q36 73 41 64 Q33 52 31 31Z" fill="#fb671f"/>
+<text x="109" y="43" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="38" fill="#082b48" letter-spacing="1">SANA</text>
+<text x="110" y="67" font-family="Arial,Helvetica,sans-serif" font-size="15" fill="#082b48" font-weight="700" letter-spacing="1.7">AL-AMAR COMPANY</text>
+</g>
+<text x="64" y="315" font-size="91" font-family="Arial,Helvetica,sans-serif" font-weight="900" fill="#082b48">API 650</text>
+<path d="M67 333H212" stroke="#fb671f" stroke-width="8"/>
+<text x="65" y="397" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="800" fill="#082b48">Welded Tanks</text>
+<text x="65" y="439" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="600" fill="#082b48">for Oil Storage</text>
+<rect x="0" y="588" width="457" height="87" fill="#082b48"/><path d="M457 588L516 675H457Z" fill="#fb671f"/>
+<text x="64" y="634" font-family="Arial,sans-serif" font-size="17" font-weight="800" fill="#fff" letter-spacing="1.2">ENGINEERING TRAINING</text>
+<text x="64" y="660" font-family="Arial,sans-serif" font-size="13" fill="#b9d3e3" letter-spacing=".5">SANA AL-AMAR COMPANY</text>
+</svg>
