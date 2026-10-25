@@ -1,0 +1,20 @@
+{
+  "name": "سنا الإعمار | SANA AL-AMAR",
+  "short_name": "سنا الإعمار",
+  "description": "الدورات التدريبية وخدمات الفحص الهندسي",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#092f4e",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "../assets/sana-logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
