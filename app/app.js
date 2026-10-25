@@ -3,9 +3,9 @@
 const root="https://sseugkalnlclovwhxiys.supabase.co/rest/v1/";
 const key="sb_publishable_NPfWrDpXNNlob6YzG0EGJg_KRFDmz0O";
 const preview=new URLSearchParams(location.search).get("preview")==="1";
-const refinery="https://sana-alamar.com/wp-content/uploads/elementor/thumbs/AnyConv.com__0a98dc28-654c-4cb6-a244-4ab0b09f3ec0-qqnvwzfdfzz6m7kql3vo9q6qdrhx3a8mlpxm5nsppc.jpg";
-const training="https://sana-alamar.com/wp-content/uploads/2022/08/6-300x200.jpg";
-const inspection="https://sana-alamar.com/wp-content/uploads/2022/08/4-300x198.jpg";
+const refinery="./reference/plant.jpg";
+const training="./reference/training.jpg";
+const inspection="./reference/inspection.jpg";
 const samples=[
 {id:-1,title_ar:"تشغيل محطات عزل النفط والغاز",short_description_ar:"التدريب على تشغيل معدات فصل النفط والغاز وإجراءات السلامة.",outline_ar:"مكونات محطات العزل\nمبادئ تشغيل الفواصل\nمراقبة المتغيرات التشغيلية\nالسلامة والاستجابة للطوارئ",certificate_summary_ar:"شهادة مشاركة بعد استيفاء متطلبات البرنامج",certificate_benefits_ar:"إثبات المشاركة والتطوير المهني",cover_image_url:refinery,is_featured:true,sort_order:1,sample_date:"15 Nov 2026"},
 {id:-2,title_ar:"أساسيات الحفر",short_description_ar:"مقدمة في عمليات الحفر ومعداته.",outline_ar:"منظومة الحفر\nمعدات الحفارة\nأساسيات سوائل الحفر\nالسلامة المهنية",cover_image_url:training,is_featured:true,sort_order:2,sample_date:"01 Dec 2026"},
@@ -46,7 +46,7 @@ return '<h2>الشهادة المكتسبة</h2>'+sample+box+'<div class="info-l
 }
 function photos(c){
 let list=media.filter(v=>String(v.course_id)===String(c.id)&&safeUrl(v.file_url)).map(v=>({url:v.file_url,caption:v.caption_ar||"صورة من الدورة"}));
-if(preview)list=[training,inspection,refinery,training,refinery,inspection].map((url,i)=>({url,caption:"صورة توضيحية "+(i+1)}));
+if(preview)list=["./reference/group.jpg","./reference/seminar.jpg","./reference/industrial.jpg","./reference/classroom.jpg","./reference/team.jpg","./reference/staff.jpg"].map((url,i)=>({url,caption:"صورة توضيحية "+(i+1)}));
 return '<h2>صور من الدورة السابقة</h2>'+(list.length?'<div class="photo-grid">'+list.map(v=>'<img alt="'+escape(v.caption)+'" src="'+escape(safeUrl(v.url))+'" loading="lazy">').join("")+'</div>':empty("لا توجد صور منشورة لهذه الدورة"));
 }
 function ratings(c){
