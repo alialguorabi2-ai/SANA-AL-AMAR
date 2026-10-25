@@ -13,7 +13,7 @@ const icon=id=>'<svg><use href="#i-'+id+'"/></svg>';
 const imgSrc=v=>/^https:\/\//i.test(text(v))?text(v):"";
 const intOrNull=v=>v===""||v==null?null:Number(v);
 const stateLabels={new:"قيد المراجعة",contacted:"تم التواصل",confirmed:"مؤكدة",completed:"مكتملة",cancelled:"ملغاة",rejected:"مرفوضة"};
-let session=null,currentUser=null,courses=[],offerings=[],registrations=[],trainees=[],editingId=null,editingTraineeId=null,filter="";
+let session=null,currentUser=null,courses=[],offerings=[],registrations=[],trainees=[],courseProtection=[],editingId=null,editingTraineeId=null,filter="";
 let screen="dashboard";
 let pendingCourseCover=null,courseCoverObjectUrl=null;
 const COURSE_COVER_MAX_BYTES=5*1024*1024;
@@ -58,7 +58,11 @@ async function uploadCourseCover(file){
 
 const pendingDraftDeletes=new Map();
 let draftUndoTicker=null;
-function displayedCourses(){return courses.filter(c=>!pendingDraftDeletes.has(String(c.id)))}
+function displayedCourses(){return courses.filter(c=>!c.is_archived&&!pendingDraftDeletes.has(String(c.id)))}
+function hasProtectedRecords(id){
+  const status=courseProtection.find(v=>String(v.course_id)===String(id));
+  return status?status.has_protected_records===true:true;
+}
 function renderUndoStack(){
   const stack=$("draftUndoStack");if(!stack)return;
   const now=Date.now();
@@ -160,15 +164,16 @@ function setNotice(message,error=false){
 }
 function loginMessage(message){$("loginMessage").textContent=message}
 async function listData(){
-  if(PREVIEW){courses=[sampleCourse];offerings=[];registrations=[];trainees=[];renderAll();return}
+  if(PREVIEW){courses=[sampleCourse];offerings=[];registrations=[];trainees=[];courseProtection=[];renderAll();return}
   try{
-    const [courseRows,offeringRows,requestRows,traineeRows]=await Promise.all([
-      http("/rest/v1/courses?select=id,title_ar,title_en,slug,short_description_ar,outline_ar,cover_image_url,certificate_type,is_featured,is_published,created_at,updated_at&order=updated_at.desc&limit=300"),
+    const [courseRows,offeringRows,requestRows,traineeRows,protectionRows]=await Promise.all([
+      http("/rest/v1/courses?select=id,title_ar,title_en,slug,short_description_ar,outline_ar,cover_image_url,certificate_type,is_featured,is_published,is_archived,archived_at,created_at,updated_at&order=updated_at.desc&limit=300"),
       http("/rest/v1/course_year_offerings?select=id,course_id,training_year,delivery_mode,duration_days,duration_hours,seat_capacity,target_audience_ar,audience_scope,is_published&order=training_year.desc&limit=800"),
       http("/rest/v1/registration_requests?select=id,course_id,trainee_id,full_name,phone,email,organization,notes,status,contacted_at,created_at&order=created_at.desc&limit=1000"),
-      http("/rest/v1/trainees?select=id,full_name,phone,email,organization,notes,created_at,updated_at&order=updated_at.desc&limit=1000")
+      http("/rest/v1/trainees?select=id,full_name,phone,email,organization,notes,created_at,updated_at&order=updated_at.desc&limit=1000"),
+      http("/rest/v1/sana_course_archive_status?select=course_id,has_protected_records&limit=1000")
     ]);
-    courses=courseRows||[];offerings=offeringRows||[];registrations=requestRows||[];trainees=traineeRows||[];
+    courses=courseRows||[];offerings=offeringRows||[];registrations=requestRows||[];trainees=traineeRows||[];courseProtection=protectionRows||[];
     setNotice("");renderAll();
   }catch(error){setNotice("تعذّر تحميل البيانات: "+error.message,true)}
 }
@@ -176,8 +181,8 @@ function offeringFor(courseId){return offerings.filter(o=>String(o.course_id)===
 function metric(label,value,color,ic){
   return '<div class="metric"><div><p>'+escapeHTML(label)+'</p><strong>'+escapeHTML(value)+'</strong></div><span class="metric-icon '+color+'">'+icon(ic)+'</span></div>';
 }
-function statusLabel(published){
-  return '<span class="status-pill '+(published?"published":"draft")+'">'+(published?"منشورة":"مسودة")+'</span>';
+function statusLabel(published,archived=false){
+  return '<span class="status-pill '+(archived?"archived":published?"published":"draft")+'">'+(archived?"مؤرشفة":published?"منشورة":"مسودة")+'</span>';
 }
 function coverHTML(row){
   const src=imgSrc(row.cover_image_url);
@@ -206,15 +211,29 @@ function empty(message){return '<div class="empty-state">'+icon("book")+'<p>'+es
 function renderCourses(){
   const term=($("courseSearch").value||$("globalSearch").value||"").toLocaleLowerCase();
   const selected=$("courseFilter").value;
-  const filtered=displayedCourses().filter(c=>(selected==="all"||(selected==="published"&&c.is_published)||(selected==="draft"&&!c.is_published))&&
+  const filtered=courses.filter(c=>!pendingDraftDeletes.has(String(c.id))&&
+    (selected==="archived"?c.is_archived:!c.is_archived&&
+    (selected==="all"||(selected==="published"&&c.is_published)||(selected==="draft"&&!c.is_published)))&&
     [c.title_ar,c.title_en,c.slug].some(v=>text(v).toLocaleLowerCase().includes(term)));
   $("courseList").innerHTML=filtered.length?filtered.map(c=>{
     const o=offeringFor(c.id);
-    const deleteButton=!PREVIEW&&currentUser?.app_metadata?.sana_role==="admin"&&!c.is_published?'<button type="button" class="btn btn-delete-draft" data-delete="'+escapeHTML(c.id)+'">حذف المسودة</button>':"";
-    return '<article class="course-card">'+coverHTML(c)+'<div class="course-info"><div style="display:flex;justify-content:space-between;align-items:center">'+statusLabel(c.is_published)+'<small style="color:#70889a">'+escapeHTML(o?.training_year||"بدون سنة")+'</small></div><h3>'+escapeHTML(c.title_ar)+'</h3><p>'+escapeHTML(c.short_description_ar||"أضف نبذة مختصرة عن الدورة من لوحة التعديل")+'</p><div class="course-meta"><span>▣ '+escapeHTML(o?.duration_days?o.duration_days+" أيام":"المدة غير محددة")+'</span><span>◉ '+escapeHTML(o?.delivery_mode==="online"?"أونلاين":o?.delivery_mode==="hybrid"?"مدمج":o?.delivery_mode?"حضوري":"غير محدد")+'</span><span>♙ '+escapeHTML(o?.seat_capacity?"المقاعد "+o.seat_capacity:"المقاعد غير محددة")+'</span></div><div class="card-foot"><button class="btn btn-outline" data-edit="'+escapeHTML(c.id)+'">'+icon("edit")+' تعديل</button><button class="btn '+(c.is_published?"btn-outline":"btn-primary")+'" data-publish="'+escapeHTML(c.id)+'">'+(c.is_published?"إلغاء النشر":"نشر الدورة")+'</button>'+deleteButton+'</div></div></article>';
-  }).join(""):empty("ماكو دورات تطابق البحث أو الفلتر");
+    const admin=!PREVIEW&&currentUser?.app_metadata?.sana_role==="admin";
+    const protectedRecords=hasProtectedRecords(c.id);
+    let managementButton="";
+    if(admin&&c.is_archived){
+      managementButton='<button type="button" class="btn btn-restore-course" data-restore="'+escapeHTML(c.id)+'">استرجاع الدورة</button>';
+    }else if(admin&&!c.is_published){
+      managementButton=protectedRecords?
+        '<button type="button" class="btn btn-archive-course" data-archive="'+escapeHTML(c.id)+'">أرشفة</button>':
+        '<button type="button" class="btn btn-delete-draft" data-delete="'+escapeHTML(c.id)+'">حذف المسودة</button>';
+    }
+    const publicationButton=c.is_archived?"":'<button class="btn '+(c.is_published?"btn-outline":"btn-primary")+'" data-publish="'+escapeHTML(c.id)+'">'+(c.is_published?"إلغاء النشر":"نشر الدورة")+'</button>';
+    const recordHint=protectedRecords&&!c.is_archived&&!c.is_published?'<p class="archive-record-hint">مرتبطة بسجلات محفوظة: الأرشفة تحافظ عليها.</p>':"";
+    return '<article class="course-card">'+coverHTML(c)+'<div class="course-info"><div style="display:flex;justify-content:space-between;align-items:center">'+statusLabel(c.is_published,c.is_archived)+'<small style="color:#70889a">'+escapeHTML(o?.training_year||"بدون سنة")+'</small></div><h3>'+escapeHTML(c.title_ar)+'</h3><p>'+escapeHTML(c.short_description_ar||"أضف نبذة مختصرة عن الدورة من لوحة التعديل")+'</p><div class="course-meta"><span>▣ '+escapeHTML(o?.duration_days?o.duration_days+" أيام":"المدة غير محددة")+'</span><span>◉ '+escapeHTML(o?.delivery_mode==="online"?"أونلاين":o?.delivery_mode==="hybrid"?"مدمج":o?.delivery_mode?"حضوري":"غير محدد")+'</span><span>♙ '+escapeHTML(o?.seat_capacity?"المقاعد "+o.seat_capacity:"المقاعد غير محددة")+'</span></div>'+recordHint+'<div class="card-foot"><button class="btn btn-outline" data-edit="'+escapeHTML(c.id)+'">'+icon("edit")+' تعديل</button>'+publicationButton+managementButton+'</div></div></article>';
+  }).join(""):empty(selected==="archived"?"لا توجد دورات مؤرشفة حالياً":"ماكو دورات تطابق البحث أو الفلتر");
   if(PREVIEW)$("addCourse").disabled=true;
 }
+
 function requestStatusOptions(value){
   return Object.entries(stateLabels).map(([key,label])=>
     '<option value="'+escapeHTML(key)+'"'+(key===value?' selected':'')+'>'+escapeHTML(label)+'</option>'
@@ -382,6 +401,7 @@ async function submitCourse(event){
 async function setPublished(id){
   if(PREVIEW){setNotice("المعاينة للعرض فقط، ولا تغيّر بيانات Supabase.");return}
   const course=courses.find(c=>String(c.id)===String(id));if(!course)return;
+  if(course.is_archived){setNotice("استرجع الدورة من الأرشيف أولاً قبل نشرها.",true);return}
   const isPublishing=!course.is_published,offering=offeringFor(course.id);
   if(isPublishing&&!offering){openCourse(course.id);$("formMessage").textContent="حدد سنة التدريب وتفاصيلها ثم احفظ قبل النشر";return}
   if(!window.confirm(isPublishing?"نشر هذه الدورة الآن في التطبيق العام؟":"إلغاء نشر الدورة وإخفاؤها عن التطبيق العام؟"))return;
@@ -397,8 +417,11 @@ async function deleteDraft(id){
     setNotice("حذف المسودات متاح للمدير فقط.",true);return;
   }
   const key=String(id),course=courses.find(c=>String(c.id)===key);
-  if(!course||course.is_published){
-    setNotice("يمكن حذف المسودات غير المنشورة فقط.",true);return;
+  if(!course||course.is_published||course.is_archived){
+    setNotice("يمكن حذف المسودات النشطة غير المنشورة فقط.",true);return;
+  }
+  if(hasProtectedRecords(key)){
+    setNotice("هذه الدورة مرتبطة بشهادات أو سجلات أخرى. استخدم «أرشفة» بدلاً من حذفها.",true);renderCourses();return;
   }
   if(pendingDraftDeletes.has(key))return;
   if(!window.confirm('حذف مسودة "'+course.title_ar+'"؟\\nيمكنك التراجع خلال 10 ثوانٍ، وبعدها يتم الحذف النهائي.'))return;
@@ -424,8 +447,41 @@ async function commitDraftDelete(id){
   }catch(error){
     pendingDraftDeletes.delete(key);refreshDraftUndoTicker();renderUndoStack();
     await listData();renderAll();
-    setNotice("تعذر حذف المسودة: "+error.message,true);
+    const related=String(error.message).includes("Course has related publication or activity records");
+    setNotice(related?"أُوقف الحذف لأن الدورة أصبحت مرتبطة بسجلات محفوظة. استخدم زر «أرشفة» بدلاً من الحذف.":"تعذر حذف المسودة: "+error.message,true);
   }
+}
+async function archiveCourse(id){
+  if(PREVIEW||currentUser?.app_metadata?.sana_role!=="admin"){
+    setNotice("الأرشفة متاحة للمدير فقط.",true);return;
+  }
+  const course=courses.find(c=>String(c.id)===String(id));
+  if(!course||course.is_published||course.is_archived)return;
+  if(!window.confirm('أرشفة دورة "'+course.title_ar+'"؟ ستُخفى من الدورات النشطة مع الاحتفاظ بجميع السجلات والشهادات.'))return;
+  try{
+    const saved=await http("/rest/v1/courses?id=eq."+encodeURIComponent(id)+"&is_published=eq.false&is_archived=eq.false",{
+      method:"PATCH",headers:{Prefer:"return=representation"},body:JSON.stringify({is_archived:true})
+    });
+    if(!Array.isArray(saved)||saved.length!==1)throw Error("لم تتغير حالة الدورة؛ حدّث القائمة وأعد المحاولة.");
+    await listData();showScreen("courses");
+    setNotice("تمت أرشفة الدورة وحفظ سجلاتها. تجدها ضمن فلتر «المؤرشفة».");
+  }catch(error){await listData();setNotice("تعذرت الأرشفة: "+error.message,true)}
+}
+async function restoreArchivedCourse(id){
+  if(PREVIEW||currentUser?.app_metadata?.sana_role!=="admin"){
+    setNotice("استرجاع الدورات متاح للمدير فقط.",true);return;
+  }
+  const course=courses.find(c=>String(c.id)===String(id));
+  if(!course||!course.is_archived)return;
+  try{
+    const saved=await http("/rest/v1/courses?id=eq."+encodeURIComponent(id)+"&is_archived=eq.true&is_published=eq.false",{
+      method:"PATCH",headers:{Prefer:"return=representation"},body:JSON.stringify({is_archived:false})
+    });
+    if(!Array.isArray(saved)||saved.length!==1)throw Error("لم تتغير حالة الدورة؛ حدّث القائمة وأعد المحاولة.");
+    $("courseFilter").value="all";
+    await listData();showScreen("courses");
+    setNotice("تم استرجاع الدورة إلى المسودات، وما اننشرت تلقائياً.");
+  }catch(error){await listData();setNotice("تعذر استرجاع الدورة: "+error.message,true)}
 }
 async function updateRequest(id,status){
   if(PREVIEW)return;
@@ -471,8 +527,8 @@ function bindUI(){
   $("courseFilter").addEventListener("change",renderCourses);
   $("globalSearch").addEventListener("input",()=>{showScreen("courses");renderCourses()});
   $("courseList").addEventListener("click",e=>{
-    const edit=e.target.closest("[data-edit]"),publish=e.target.closest("[data-publish]"),remove=e.target.closest("[data-delete]");
-    if(edit)openCourse(edit.dataset.edit);else if(publish)setPublished(publish.dataset.publish);else if(remove)deleteDraft(remove.dataset.delete);
+    const edit=e.target.closest("[data-edit]"),publish=e.target.closest("[data-publish]"),remove=e.target.closest("[data-delete]"),archive=e.target.closest("[data-archive]"),restore=e.target.closest("[data-restore]");
+    if(edit)openCourse(edit.dataset.edit);else if(publish)setPublished(publish.dataset.publish);else if(remove)deleteDraft(remove.dataset.delete);else if(archive)archiveCourse(archive.dataset.archive);else if(restore)restoreArchivedCourse(restore.dataset.restore);
   });
   $("draftUndoStack").addEventListener("click",e=>{
     const undo=e.target.closest("[data-undo]");
