@@ -112,3 +112,14 @@ input:focus,select:focus,textarea:focus{border-color:#1a86d7;box-shadow:0 0 0 3p
 .request-field.wide{grid-column:1/-1}.request-field .multiline{white-space:pre-wrap;font-weight:500;line-height:1.8}
 .registry-link-state{font-size:12px;background:#eef6fb;padding:10px 12px;border-radius:8px;margin-top:15px;color:#315c79}
 @media(max-width:560px){.registry-toolbar{display:flex;flex-wrap:wrap}.registry-toolbar .search-field{flex-basis:100%}.request-detail-grid{grid-template-columns:1fr}}
+
+/* Course cover upload */
+.cover-upload-widget{display:grid;gap:8px;padding:13px 15px;background:#f4f8fc;border:1px solid #dce8f1;border-radius:11px}
+.cover-upload-action{display:inline-flex;align-items:center;justify-content:center;width:max-content;max-width:100%;cursor:pointer;background:#0b5688;border:1px solid #0b5688;color:#fff!important;padding:10px 17px;border-radius:9px;font-size:13px;font-weight:800}
+.cover-upload-action:hover{background:#08436a}
+.cover-upload-widget input[type=file]{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.cover-upload-widget input[type=file]:focus-visible + .cover-upload-help{outline:2px solid #0b5688;outline-offset:3px}
+.cover-upload-help,.cover-upload-hint{margin:0;color:#597489;font-size:12px}
+.cover-upload-hint:empty{display:none}
+.cover-upload-preview{width:min(100%,380px);height:170px;border-radius:9px;overflow:hidden;background:#e8f0f5;border:1px solid #d1e2ed}
+.cover-upload-preview img{width:100%;height:100%;object-fit:cover;display:block}
