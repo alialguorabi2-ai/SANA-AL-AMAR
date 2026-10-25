@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+<defs>
+<linearGradient id="light" x2="1" y2="1"><stop stop-color="#ffffff"/><stop offset=".62" stop-color="#eff5fb"/><stop offset="1" stop-color="#cbdeed"/></linearGradient>
+<linearGradient id="metal" x2="1" y2=".3"><stop stop-color="#c9dfe8"/><stop offset=".27" stop-color="#799bb0"/><stop offset=".56" stop-color="#e6f0f4"/><stop offset=".86" stop-color="#617f97"/><stop offset="1" stop-color="#cbdde6"/></linearGradient>
+<radialGradient id="glow"><stop stop-color="#f88638" stop-opacity=".5"/><stop offset="1" stop-color="#f88638" stop-opacity="0"/></radialGradient>
+<pattern id="grid" width="39" height="39" patternUnits="userSpaceOnUse"><path d="M39 0H0V39" stroke="#8fb6cb" stroke-width="1" fill="none" opacity=".23"/></pattern>
+<clipPath id="right"><path d="M613 0H1200V675H470Q633 520 584 340Q546 203 613 0"/></clipPath>
+</defs>
+<rect width="1200" height="675" fill="url(#light)"/>
+<g clip-path="url(#right)"><rect x="550" width="650" height="675" fill="#093854"/><rect x="550" width="650" height="675" fill="url(#grid)"/><circle cx="987" cy="260" r="340" fill="url(#glow)"/><g transform="translate(35 3)"><ellipse cx="915" cy="532" rx="280" ry="44" fill="#021927" opacity=".4"/><rect x="705" y="320" width="415" height="170" rx="80" fill="url(#metal)" stroke="#204d6b" stroke-width="10"/>
+<ellipse cx="713" cy="405" rx="69" ry="86" fill="#bbd2df" stroke="#274b67" stroke-width="10"/><ellipse cx="1094" cy="404" rx="34" ry="80" fill="#7298b3" stroke="#274b67" stroke-width="10"/>
+<path d="M790 326L790 487M1018 325L1018 487" stroke="#345f7b" stroke-width="10"/>
+<path d="M777 490V558M1010 492V558M737 558H832M970 558H1050" fill="none" stroke="#a6c0d1" stroke-width="15"/>
+<path d="M870 325V244M930 324V253M824 244H957" stroke="#d8e6ef" stroke-width="17" fill="none"/>
+<g fill="#f4f7fa" stroke="#315575" stroke-width="7"><circle cx="714" cy="405" r="56"/><circle cx="1094" cy="404" r="27"/></g>
+<g fill="#315575"><circle cx="714" cy="348" r="5"/><circle cx="714" cy="462" r="5"/><circle cx="656" cy="403" r="5"/><circle cx="773" cy="403" r="5"/></g></g></g>
+<path d="M612 0Q545 200 584 340Q633 520 470 675" stroke="#fff" stroke-width="12" fill="none"/>
+<path d="M650 0Q589 186 633 362Q667 523 518 675" stroke="#fa671f" stroke-width="13" fill="none"/>
+<g transform="translate(48 34)">
+<path d="M48 11 L57 17 L70 14 L72 27 L85 33 L78 45 L82 58 L69 66 L64 78 L50 76 L38 81 L28 71 L13 69 L11 56 L2 46 L10 34 L9 20 L23 17 L32 7Z" fill="#082b48"/>
+<path d="M48 19 Q79 51 59 67 Q48 75 37 65 Q45 58 47 47 Q43 37 48 19Z" fill="#fb671f"/><path d="M31 31 Q14 56 28 67 Q36 73 41 64 Q33 52 31 31Z" fill="#fb671f"/>
+<text x="109" y="43" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="38" fill="#082b48" letter-spacing="1">SANA</text>
+<text x="110" y="67" font-family="Arial,Helvetica,sans-serif" font-size="15" fill="#082b48" font-weight="700" letter-spacing="1.7">AL-AMAR COMPANY</text>
+</g>
+<text x="64" y="315" font-size="91" font-family="Arial,Helvetica,sans-serif" font-weight="900" fill="#082b48">API 510</text>
+<path d="M67 333H212" stroke="#fb671f" stroke-width="8"/>
+<text x="65" y="397" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="800" fill="#082b48">Pressure Vessel</text>
+<text x="65" y="439" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="600" fill="#082b48">Inspection</text>
+<rect x="0" y="588" width="457" height="87" fill="#082b48"/><path d="M457 588L516 675H457Z" fill="#fb671f"/>
+<text x="64" y="634" font-family="Arial,sans-serif" font-size="17" font-weight="800" fill="#fff" letter-spacing="1.2">ENGINEERING TRAINING</text>
+<text x="64" y="660" font-family="Arial,sans-serif" font-size="13" fill="#b9d3e3" letter-spacing=".5">SANA AL-AMAR COMPANY</text>
+</svg>
