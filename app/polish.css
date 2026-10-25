@@ -28,6 +28,6 @@
 .app{height:100dvh;min-height:0;overflow:hidden}
 .app-header{flex:none}
 .scroll{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:22px;scrollbar-width:thin}
-.nav{position:relative;bottom:auto;flex:none;height:72px;min-height:72px}
+.nav{position:relative;bottom:auto;flex:none;height:auto;min-height:72px}
 .hero{height:190px}
 @media(min-width:520px){.app{height:min(100dvh,950px);min-height:0;margin:auto}}
