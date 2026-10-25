@@ -23,3 +23,11 @@
 @media(max-width:390px){.quick{gap:6px}.quick button{font-size:9px}.quick .tile{width:46px;height:46px}.section-row img{width:38%}.detail-meta{gap:12px}}
 @media(min-width:480px){.app{border-inline:1px solid #edf0f2}}
 @media(prefers-reduced-motion:reduce){.quick button,.course-card{transition:none}}
+
+/* Match the approved preview's fixed mobile viewport and visible tab bar. */
+.app{height:100dvh;min-height:0;overflow:hidden}
+.app-header{flex:none}
+.scroll{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:22px;scrollbar-width:thin}
+.nav{position:relative;bottom:auto;flex:none;height:72px;min-height:72px}
+.hero{height:190px}
+@media(min-width:520px){.app{height:min(100dvh,950px);min-height:0;margin:auto}}
