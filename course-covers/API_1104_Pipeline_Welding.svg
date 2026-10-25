@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+<defs>
+<linearGradient id="light" x2="1" y2="1"><stop stop-color="#ffffff"/><stop offset=".62" stop-color="#eff5fb"/><stop offset="1" stop-color="#cbdeed"/></linearGradient>
+<linearGradient id="metal" x2="1" y2=".3"><stop stop-color="#c9dfe8"/><stop offset=".27" stop-color="#799bb0"/><stop offset=".56" stop-color="#e6f0f4"/><stop offset=".86" stop-color="#617f97"/><stop offset="1" stop-color="#cbdde6"/></linearGradient>
+<radialGradient id="glow"><stop stop-color="#f88638" stop-opacity=".5"/><stop offset="1" stop-color="#f88638" stop-opacity="0"/></radialGradient>
+<pattern id="grid" width="39" height="39" patternUnits="userSpaceOnUse"><path d="M39 0H0V39" stroke="#8fb6cb" stroke-width="1" fill="none" opacity=".23"/></pattern>
+<clipPath id="right"><path d="M613 0H1200V675H470Q633 520 584 340Q546 203 613 0"/></clipPath>
+</defs>
+<rect width="1200" height="675" fill="url(#light)"/>
+<g clip-path="url(#right)"><rect x="550" width="650" height="675" fill="#093854"/><rect x="550" width="650" height="675" fill="url(#grid)"/><circle cx="987" cy="260" r="340" fill="url(#glow)"/><g><path d="M605 504Q770 365 1190 415V600Q845 557 606 616Z" fill="url(#metal)" stroke="#2e5268" stroke-width="11"/>
+<path d="M604 504Q770 366 1190 416" stroke="#a9ccdb" stroke-width="11" fill="none"/>
+<path d="M807 410Q833 487 831 575" stroke="#163c55" stroke-width="21" fill="none"/><path d="M818 418Q843 487 843 570" stroke="#ffa660" stroke-width="8" stroke-dasharray="8 11" fill="none"/>
+<path d="M820 424L929 232" stroke="#ffd6a6" stroke-width="11"/><path d="M944 197L893 231L931 268L970 221Z" fill="#193e54" stroke="#c8d7df" stroke-width="8"/>
+<g fill="#ffcb72"><path d="M817 425L817.0 445.0" stroke="#ffbd59" stroke-width="1"/><path d="M817 425L847.4 391.1" stroke="#ffbd59" stroke-width="2"/><path d="M817 425L755.2 427.2" stroke="#ffbd59" stroke-width="3"/><path d="M817 425L879.6 470.9" stroke="#ffbd59" stroke-width="1"/><path d="M817 425L800.6 324.4" stroke="#ffbd59" stroke-width="2"/><path d="M817 425L798.1 521.3" stroke="#ffbd59" stroke-width="3"/><path d="M817 425L867.3 387.2" stroke="#ffbd59" stroke-width="1"/><path d="M817 425L756.0 402.9" stroke="#ffbd59" stroke-width="2"/><path d="M817 425L845.9 478.5" stroke="#ffbd59" stroke-width="3"/><path d="M817 425L857.1 349.2" stroke="#ffbd59" stroke-width="1"/><path d="M817 425L778.8 462.7" stroke="#ffbd59" stroke-width="2"/><path d="M817 425L873.1 458.2" stroke="#ffbd59" stroke-width="3"/><path d="M817 425L779.7 303.6" stroke="#ffbd59" stroke-width="1"/><path d="M817 425L795.9 461.0" stroke="#ffbd59" stroke-width="2"/><path d="M817 425L843.4 388.7" stroke="#ffbd59" stroke-width="3"/><path d="M817 425L768.5 410.9" stroke="#ffbd59" stroke-width="1"/></g><circle cx="817" cy="425" r="19" fill="#fff2c7"/></g></g>
+<path d="M612 0Q545 200 584 340Q633 520 470 675" stroke="#fff" stroke-width="12" fill="none"/>
+<path d="M650 0Q589 186 633 362Q667 523 518 675" stroke="#fa671f" stroke-width="13" fill="none"/>
+<g transform="translate(48 34)">
+<path d="M48 11 L57 17 L70 14 L72 27 L85 33 L78 45 L82 58 L69 66 L64 78 L50 76 L38 81 L28 71 L13 69 L11 56 L2 46 L10 34 L9 20 L23 17 L32 7Z" fill="#082b48"/>
+<path d="M48 19 Q79 51 59 67 Q48 75 37 65 Q45 58 47 47 Q43 37 48 19Z" fill="#fb671f"/><path d="M31 31 Q14 56 28 67 Q36 73 41 64 Q33 52 31 31Z" fill="#fb671f"/>
+<text x="109" y="43" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="38" fill="#082b48" letter-spacing="1">SANA</text>
+<text x="110" y="67" font-family="Arial,Helvetica,sans-serif" font-size="15" fill="#082b48" font-weight="700" letter-spacing="1.7">AL-AMAR COMPANY</text>
+</g>
+<text x="64" y="315" font-size="91" font-family="Arial,Helvetica,sans-serif" font-weight="900" fill="#082b48">API 1104</text>
+<path d="M67 333H212" stroke="#fb671f" stroke-width="8"/>
+<text x="65" y="397" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="800" fill="#082b48">Welding of Pipelines</text>
+<text x="65" y="439" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="600" fill="#082b48">and Related Facilities</text>
+<rect x="0" y="588" width="457" height="87" fill="#082b48"/><path d="M457 588L516 675H457Z" fill="#fb671f"/>
+<text x="64" y="634" font-family="Arial,sans-serif" font-size="17" font-weight="800" fill="#fff" letter-spacing="1.2">ENGINEERING TRAINING</text>
+<text x="64" y="660" font-family="Arial,sans-serif" font-size="13" fill="#b9d3e3" letter-spacing=".5">SANA AL-AMAR COMPANY</text>
+</svg>
