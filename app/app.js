@@ -16,7 +16,7 @@ let courses=[],offers=[],media=[],certs=[],reviews=[],active=null,detailTab="abo
 const $=id=>document.getElementById(id);
 const escape=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safeUrl=s=>{try{let u=new URL(s,location.href);return u.protocol==="https:"?u.href:""}catch(_){return""}};
-const pic=(item,alt="",cls="")=>'<img class="'+cls+'" src="'+escape(safeUrl(item.cover_image_url)||refinery)+'" alt="'+escape(alt)+'" loading="lazy">';
+const pic=(item,alt="",cls="")=>'<img class="'+cls+'" src="'+escape(safeUrl(item.cover_image_url)||"../assets/sana-logo.png")+'" alt="'+escape(alt)+'" loading="lazy">';
 const offer=id=>offers.find(x=>String(x.course_id)===String(id));
 const symbol=(name,cls="")=>'<svg class="'+cls+'"><use href="#'+name+'"/></svg>';
 function courseCard(item){
