@@ -130,7 +130,8 @@ function renderCourses(){
     [c.title_ar,c.title_en,c.slug].some(v=>text(v).toLocaleLowerCase().includes(term)));
   $("courseList").innerHTML=filtered.length?filtered.map(c=>{
     const o=offeringFor(c.id);
-    return '<article class="course-card">'+coverHTML(c)+'<div class="course-info"><div style="display:flex;justify-content:space-between;align-items:center">'+statusLabel(c.is_published)+'<small style="color:#70889a">'+escapeHTML(o?.training_year||"بدون سنة")+'</small></div><h3>'+escapeHTML(c.title_ar)+'</h3><p>'+escapeHTML(c.short_description_ar||"أضف نبذة مختصرة عن الدورة من لوحة التعديل")+'</p><div class="course-meta"><span>▣ '+escapeHTML(o?.duration_days?o.duration_days+" أيام":"المدة غير محددة")+'</span><span>◉ '+escapeHTML(o?.delivery_mode==="online"?"أونلاين":o?.delivery_mode==="hybrid"?"مدمج":o?.delivery_mode?"حضوري":"غير محدد")+'</span><span>♙ '+escapeHTML(o?.seat_capacity?"المقاعد "+o.seat_capacity:"المقاعد غير محددة")+'</span></div><div class="card-foot"><button class="btn btn-outline" data-edit="'+escapeHTML(c.id)+'">'+icon("edit")+' تعديل</button><button class="btn '+(c.is_published?"btn-outline":"btn-primary")+'" data-publish="'+escapeHTML(c.id)+'">'+(c.is_published?"إلغاء النشر":"نشر الدورة")+'</button></div></div></article>';
+    const deleteButton=!PREVIEW&&currentUser?.app_metadata?.sana_role==="admin"&&!c.is_published?'<button type="button" class="btn btn-delete-draft" data-delete="'+escapeHTML(c.id)+'">حذف المسودة</button>':"";
+    return '<article class="course-card">'+coverHTML(c)+'<div class="course-info"><div style="display:flex;justify-content:space-between;align-items:center">'+statusLabel(c.is_published)+'<small style="color:#70889a">'+escapeHTML(o?.training_year||"بدون سنة")+'</small></div><h3>'+escapeHTML(c.title_ar)+'</h3><p>'+escapeHTML(c.short_description_ar||"أضف نبذة مختصرة عن الدورة من لوحة التعديل")+'</p><div class="course-meta"><span>▣ '+escapeHTML(o?.duration_days?o.duration_days+" أيام":"المدة غير محددة")+'</span><span>◉ '+escapeHTML(o?.delivery_mode==="online"?"أونلاين":o?.delivery_mode==="hybrid"?"مدمج":o?.delivery_mode?"حضوري":"غير محدد")+'</span><span>♙ '+escapeHTML(o?.seat_capacity?"المقاعد "+o.seat_capacity:"المقاعد غير محددة")+'</span></div><div class="card-foot"><button class="btn btn-outline" data-edit="'+escapeHTML(c.id)+'">'+icon("edit")+' تعديل</button><button class="btn '+(c.is_published?"btn-outline":"btn-primary")+'" data-publish="'+escapeHTML(c.id)+'">'+(c.is_published?"إلغاء النشر":"نشر الدورة")+'</button>'+deleteButton+'</div></div></article>';
   }).join(""):empty("ماكو دورات تطابق البحث أو الفلتر");
   if(PREVIEW)$("addCourse").disabled=true;
 }
@@ -208,6 +209,27 @@ async function setPublished(id){
     await listData();setNotice(isPublishing?"تم نشر الدورة بنجاح.":"تم إلغاء نشر الدورة وإخفاؤها عن العامة.");
   }catch(error){setNotice("تعذر تغيير النشر: "+error.message,true)}
 }
+async function deleteDraft(id){
+  if(PREVIEW||currentUser?.app_metadata?.sana_role!=="admin"){
+    setNotice("حذف المسودات متاح للمدير فقط.",true);return;
+  }
+  const course=courses.find(c=>String(c.id)===String(id));
+  if(!course||course.is_published){
+    setNotice("يمكن حذف المسودات غير المنشورة فقط.",true);return;
+  }
+  if(!window.confirm('هل تريد حذف مسودة "'+course.title_ar+'" نهائياً؟\\nلا يمكن التراجع عن هذا الإجراء.'))return;
+  const button=[...document.querySelectorAll("[data-delete]")].find(b=>b.dataset.delete===String(id));
+  if(button)button.disabled=true;
+  try{
+    const deleted=await http("/rest/v1/courses?id=eq."+encodeURIComponent(id)+"&is_published=eq.false",{
+      method:"DELETE",headers:{Prefer:"return=representation"}
+    });
+    if(!Array.isArray(deleted)||deleted.length!==1)throw new Error("لم تُحذف المسودة؛ تحقق من الصلاحية وحالة الدورة.");
+    await listData();showScreen("courses");setNotice("تم حذف مسودة الدورة: "+course.title_ar);
+  }catch(error){
+    await listData();setNotice("تعذر حذف المسودة: "+error.message,true);
+  }
+}
 async function updateRequest(id,status){
   if(PREVIEW)return;
   try{
@@ -247,8 +269,8 @@ function bindUI(){
   $("courseFilter").addEventListener("change",renderCourses);
   $("globalSearch").addEventListener("input",()=>{showScreen("courses");renderCourses()});
   $("courseList").addEventListener("click",e=>{
-    const edit=e.target.closest("[data-edit]"),publish=e.target.closest("[data-publish]");
-    if(edit)openCourse(edit.dataset.edit);else if(publish)setPublished(publish.dataset.publish);
+    const edit=e.target.closest("[data-edit]"),publish=e.target.closest("[data-publish]"),remove=e.target.closest("[data-delete]");
+    if(edit)openCourse(edit.dataset.edit);else if(publish)setPublished(publish.dataset.publish);else if(remove)deleteDraft(remove.dataset.delete);
   });
   $("courseForm").addEventListener("submit",submitCourse);
   $("closeDialog").addEventListener("click",()=>$("courseDialog").close());
