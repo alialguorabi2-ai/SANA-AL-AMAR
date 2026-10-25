@@ -123,3 +123,11 @@ input:focus,select:focus,textarea:focus{border-color:#1a86d7;box-shadow:0 0 0 3p
 .cover-upload-hint:empty{display:none}
 .cover-upload-preview{width:min(100%,380px);height:170px;border-radius:9px;overflow:hidden;background:#e8f0f5;border:1px solid #d1e2ed}
 .cover-upload-preview img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* Safe course archive and restore controls */
+.status-pill.archived{background:#e8e9ed;color:#4b5669;border:1px solid #cbd2db}
+.btn-archive-course{background:#fff7e9;color:#9d5a07;border:1px solid #e7c58c}
+.btn-archive-course:hover{background:#ffeed4;border-color:#dfa65b}
+.btn-restore-course{background:#eaf7ef;color:#116b3d;border:1px solid #acd7bc}
+.btn-restore-course:hover{background:#d9f1e2;border-color:#79bb91}
+.archive-record-hint{font-size:11px;color:#99601b;background:#fff9ed;border-radius:7px;padding:8px 10px;margin-top:10px;margin-bottom:3px}
