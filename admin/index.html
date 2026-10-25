@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#082b4a">
   <meta name="description" content="لوحة إدارة سنا الإعمار للدورات والتسجيلات.">
   <title>SANA AL-AMAR | لوحة الإدارة</title>
-  <link rel="stylesheet" href="./style.css?v=20261025-undo10-1">
+  <link rel="stylesheet" href="./style.css?v=20261025-trainees-1">
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="icon-sprite" aria-hidden="true">
@@ -95,8 +95,16 @@
         <div id="courseList" class="course-grid"></div>
       </section>
       <section id="requestsScreen" class="screen hidden">
-        <div class="section-head"><div><h1>طلبات التسجيل</h1><p>الطلبات متاحة فقط للمستخدمين المخوّلين بالإدارة</p></div></div>
-        <div class="panel table-scroll"><table class="data-table"><thead><tr><th>#</th><th>اسم المتدرب</th><th>الدورة</th><th>تاريخ الطلب</th><th>الحالة</th></tr></thead><tbody id="requestRows"></tbody></table></div>
+        <div class="section-head"><div><h1>طلبات التسجيل</h1><p>استقبال طلبات التسجيل، مراجعتها، وتحديث حالة كل طلب وربطه بملف المتدرب</p></div></div>
+        <div class="panel toolbar registry-toolbar"><label class="search-field"><svg><use href="#i-search"/></svg><input id="requestSearch" type="search" placeholder="الاسم، الهاتف، البريد أو الدورة..." aria-label="بحث في الطلبات"></label><select id="requestFilter" aria-label="تصفية الطلبات"><option value="all">كل الحالات</option><option value="new">قيد المراجعة</option><option value="contacted">تم التواصل</option><option value="confirmed">مؤكدة</option><option value="completed">مكتملة</option><option value="cancelled">ملغاة</option><option value="rejected">مرفوضة</option></select><button class="btn btn-outline" id="reloadRequests">تحديث</button></div>
+        <p class="registry-count" id="requestCount">0 طلب</p>
+        <div class="panel table-scroll"><table class="data-table"><thead><tr><th>رقم الطلب</th><th>الاسم</th><th>الهاتف</th><th>الدورة</th><th>تاريخ الطلب</th><th>الحالة</th><th>التفاصيل</th></tr></thead><tbody id="requestRows"></tbody></table></div>
+      </section>
+      <section id="traineesScreen" class="screen hidden">
+        <div class="section-head"><div><h1>إدارة المتدربين</h1><p>سجل المتدربين، بيانات التواصل، وتاريخ طلبات التسجيل المرتبطة بكل شخص</p></div><button class="btn btn-primary" id="addTrainee"><svg><use href="#i-plus"/></svg> إضافة متدرب</button></div>
+        <div class="panel toolbar registry-toolbar"><label class="search-field"><svg><use href="#i-search"/></svg><input id="traineeSearch" type="search" placeholder="ابحث بالاسم أو الهاتف أو البريد أو الشركة..." aria-label="البحث عن متدرب"></label><button class="btn btn-outline" id="reloadTrainees">تحديث</button></div>
+        <p class="registry-count" id="traineeCount">0 متدرب</p>
+        <div class="panel table-scroll"><table class="data-table"><thead><tr><th>المعرّف</th><th>الاسم</th><th>الهاتف</th><th>البريد الإلكتروني</th><th>الشركة</th><th>الطلبات</th><th>الملف</th></tr></thead><tbody id="traineeRows"></tbody></table></div>
       </section>
       <section id="placeholderScreen" class="screen hidden"><div class="panel placeholder-panel"><svg><use href="#i-gear"/></svg><h1 id="placeholderTitle">قسم آخر</h1><p>هذا القسم موجود في التصميم المعتمد، وسيتم ربطه عند تنفيذ وحدته. لا تُعرض بيانات تجريبية على أنها حقيقية.</p></div></section>
     </main>
@@ -127,7 +135,26 @@
       <div class="dialog-footer"><p id="formMessage" role="alert" class="feedback"></p><button type="button" class="btn btn-outline" id="cancelDialog">إلغاء</button><button type="submit" class="btn btn-primary" id="saveCourse">حفظ المسودة</button></div>
     </form>
   </dialog>
+
+  <dialog class="course-dialog registry-dialog" id="traineeDialog">
+    <form id="traineeForm">
+      <div class="dialog-head"><div><h2 id="traineeDialogTitle">إضافة متدرب</h2><p>بيانات السجل محفوظة للإدارة فقط، ولا تظهر لزوار التطبيق.</p></div><button type="button" class="icon-button" id="closeTraineeDialog" aria-label="إغلاق"><svg><use href="#i-close"/></svg></button></div>
+      <div class="form-body"><div class="form-grid">
+        <label>اسم المتدرب <em>*</em><input name="full_name" required maxlength="200" autocomplete="name"></label>
+        <label>رقم الهاتف<input name="phone" type="tel" maxlength="40" autocomplete="tel"></label>
+        <label>البريد الإلكتروني<input name="email" type="email" maxlength="254" autocomplete="email"></label>
+        <label>الشركة / جهة العمل<input name="organization" maxlength="200"></label>
+        <label class="span-2">ملاحظات داخلية<textarea name="notes" rows="3" maxlength="4000"></textarea></label>
+      </div><div id="traineeHistory" class="trainee-history"></div></div>
+      <div class="dialog-footer"><p class="feedback" id="traineeFormMessage" role="alert"></p><button type="button" class="btn btn-outline" id="cancelTraineeDialog">إلغاء</button><button type="submit" class="btn btn-primary" id="saveTrainee">حفظ المتدرب</button></div>
+    </form>
+  </dialog>
+  <dialog class="course-dialog registry-dialog" id="requestDialog">
+    <div class="dialog-head"><div><h2 id="requestDetailsTitle">تفاصيل طلب التسجيل</h2><p>معلومات الطلب للاستخدام الإداري فقط.</p></div><button type="button" class="icon-button" id="closeRequestDialog" aria-label="إغلاق"><svg><use href="#i-close"/></svg></button></div>
+    <div class="form-body"><div id="requestDetailFields" class="request-detail-grid"></div><p id="requestTraineeLink" class="registry-link-state"></p><p class="feedback" id="requestDetailsMessage" role="alert"></p></div>
+    <div class="dialog-footer"><button type="button" class="btn btn-outline" id="dismissRequestDialog">إغلاق</button><button type="button" class="btn btn-primary" id="approveTraineeButton">إضافة / ربط بملف متدرب</button></div>
+  </dialog>
   <div id="draftUndoStack" class="draft-undo-stack" aria-label="التراجع عن حذف المسودات"></div>
-  <script type="module" src="./app.js?v=20261025-undo10-1"></script>
+  <script type="module" src="./app.js?v=20261025-trainees-1"></script>
 </body>
 </html>
