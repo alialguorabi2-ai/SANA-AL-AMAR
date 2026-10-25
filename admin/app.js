@@ -13,7 +13,7 @@ const icon=id=>'<svg><use href="#i-'+id+'"/></svg>';
 const imgSrc=v=>/^https:\/\//i.test(text(v))?text(v):"";
 const intOrNull=v=>v===""||v==null?null:Number(v);
 const stateLabels={new:"قيد المراجعة",contacted:"تم التواصل",confirmed:"مؤكدة",completed:"مكتملة",cancelled:"ملغاة",rejected:"مرفوضة"};
-let session=null,currentUser=null,courses=[],offerings=[],registrations=[],editingId=null,filter="";
+let session=null,currentUser=null,courses=[],offerings=[],registrations=[],trainees=[],editingId=null,editingTraineeId=null,filter="";
 let screen="dashboard";
 const pendingDraftDeletes=new Map();
 let draftUndoTicker=null;
@@ -119,14 +119,15 @@ function setNotice(message,error=false){
 }
 function loginMessage(message){$("loginMessage").textContent=message}
 async function listData(){
-  if(PREVIEW){courses=[sampleCourse];offerings=[];registrations=[];renderAll();return}
+  if(PREVIEW){courses=[sampleCourse];offerings=[];registrations=[];trainees=[];renderAll();return}
   try{
-    const [courseRows,offeringRows,requestRows]=await Promise.all([
+    const [courseRows,offeringRows,requestRows,traineeRows]=await Promise.all([
       http("/rest/v1/courses?select=id,title_ar,title_en,slug,short_description_ar,outline_ar,cover_image_url,certificate_type,is_featured,is_published,created_at,updated_at&order=updated_at.desc&limit=300"),
       http("/rest/v1/course_year_offerings?select=id,course_id,training_year,delivery_mode,duration_days,duration_hours,seat_capacity,target_audience_ar,audience_scope,is_published&order=training_year.desc&limit=800"),
-      http("/rest/v1/registration_requests?select=id,course_id,full_name,status,created_at&order=created_at.desc&limit=300")
+      http("/rest/v1/registration_requests?select=id,course_id,trainee_id,full_name,phone,email,organization,notes,status,contacted_at,created_at&order=created_at.desc&limit=1000"),
+      http("/rest/v1/trainees?select=id,full_name,phone,email,organization,notes,created_at,updated_at&order=updated_at.desc&limit=1000")
     ]);
-    courses=courseRows||[];offerings=offeringRows||[];registrations=requestRows||[];
+    courses=courseRows||[];offerings=offeringRows||[];registrations=requestRows||[];trainees=traineeRows||[];
     setNotice("");renderAll();
   }catch(error){setNotice("تعذّر تحميل البيانات: "+error.message,true)}
 }
@@ -173,21 +174,118 @@ function renderCourses(){
   }).join(""):empty("ماكو دورات تطابق البحث أو الفلتر");
   if(PREVIEW)$("addCourse").disabled=true;
 }
-function renderRequests(){
-  const options=Object.entries(stateLabels).map(([key,name])=>'<option value="'+escapeHTML(key)+'">'+escapeHTML(name)+'</option>').join("");
-  $("requestRows").innerHTML=registrations.length?registrations.map(r=>
-    '<tr><td>'+escapeHTML(r.id)+'</td><td>'+escapeHTML(r.full_name)+'</td><td>'+escapeHTML(requestName(r))+'</td><td>'+escapeHTML(dateLabel(r.created_at))+'</td><td><select class="request-status" data-request="'+escapeHTML(r.id)+'" '+(PREVIEW?"disabled":"")+'>'+options.replace('value="'+escapeHTML(r.status)+'"','value="'+escapeHTML(r.status)+'" selected')+'</select></td></tr>'
-  ).join(""):'<tr><td colspan="5" style="text-align:center;padding:36px;color:#789">ماكو طلبات تسجيل حالياً</td></tr>';
+function requestStatusOptions(value){
+  return Object.entries(stateLabels).map(([key,label])=>
+    '<option value="'+escapeHTML(key)+'"'+(key===value?' selected':'')+'>'+escapeHTML(label)+'</option>'
+  ).join("");
 }
-function renderAll(){renderDashboard();renderCourses();renderRequests()}
+function matchQuery(record,q){
+  return Object.values(record).some(v=>String(v??"").toLocaleLowerCase().includes(q));
+}
+function renderRequests(){
+  const search=text($("requestSearch").value).toLocaleLowerCase();
+  const status=$("requestFilter").value;
+  const filtered=registrations.filter(r=>(status==="all"||r.status===status)&&
+    [r.full_name,r.phone,r.email,r.organization,requestName(r),r.id].some(v=>text(v).toLocaleLowerCase().includes(search)));
+  $("requestCount").textContent=filtered.length+" طلب من أصل "+registrations.length;
+  $("requestRows").innerHTML=filtered.length?filtered.map(r=>
+    '<tr><td>#'+escapeHTML(r.id)+'</td><td><strong>'+escapeHTML(r.full_name)+'</strong></td><td>'+escapeHTML(r.phone)+'</td><td>'+escapeHTML(requestName(r))+'</td><td>'+escapeHTML(dateLabel(r.created_at))+'</td><td><select aria-label="تغيير حالة الطلب" class="request-status" data-request="'+escapeHTML(r.id)+'" '+(PREVIEW?"disabled":"")+'>'+requestStatusOptions(r.status)+'</select></td><td><button type="button" class="btn btn-outline btn-small" data-request-detail="'+escapeHTML(r.id)+'">تفاصيل</button></td></tr>'
+  ).join(""):'<tr><td colspan="7" class="no-results">لا توجد طلبات تسجيل مطابقة</td></tr>';
+}
+function traineeRegistrationCount(id){
+  return registrations.filter(r=>String(r.trainee_id)===String(id)).length;
+}
+function renderTrainees(){
+  const query=text($("traineeSearch").value).toLocaleLowerCase();
+  const filtered=trainees.filter(t=>[t.full_name,t.phone,t.email,t.organization,t.id].some(v=>text(v).toLocaleLowerCase().includes(query)));
+  $("traineeCount").textContent=filtered.length+" متدرب من أصل "+trainees.length;
+  $("traineeRows").innerHTML=filtered.length?filtered.map(t=>
+    '<tr><td>#'+escapeHTML(t.id)+'</td><td><strong>'+escapeHTML(t.full_name)+'</strong></td><td>'+escapeHTML(t.phone||"—")+'</td><td>'+escapeHTML(t.email||"—")+'</td><td>'+escapeHTML(t.organization||"—")+'</td><td>'+traineeRegistrationCount(t.id)+'</td><td><button type="button" class="btn btn-outline btn-small" data-trainee-edit="'+escapeHTML(t.id)+'">عرض / تعديل</button></td></tr>'
+  ).join(""):'<tr><td colspan="7" class="no-results">لا توجد سجلات متدربين مطابقة. تگدر تضيف أول متدرب من الزر أعلاه.</td></tr>';
+}
+function openTrainee(id=null){
+  if(PREVIEW){setNotice("المعاينة لا تسمح بإضافة أو تعديل بيانات حقيقية.");return}
+  editingTraineeId=id;
+  const form=$("traineeForm");form.reset();$("traineeFormMessage").textContent="";
+  const t=trainees.find(x=>String(x.id)===String(id));
+  $("traineeDialogTitle").textContent=t?"ملف المتدرب وتعديل بياناته":"إضافة متدرب جديد";
+  for(const field of ["full_name","phone","email","organization","notes"])
+    form.elements.namedItem(field).value=t?.[field]||"";
+  const related=t?registrations.filter(r=>String(r.trainee_id)===String(t.id)):[];
+  $("traineeHistory").innerHTML=t?'<h3>سجل طلبات التسجيل المرتبطة</h3>'+(related.length?
+    related.map(r=>'<div class="trainee-history-row"><span>'+escapeHTML(requestName(r))+'</span><span>'+escapeHTML(stateLabels[r.status]||r.status)+'</span><small>'+escapeHTML(dateLabel(r.created_at))+'</small></div>').join(""):
+    '<p class="muted">ماكو طلبات مرتبطة بهذا المتدرب حالياً.</p>'):"";
+  $("traineeDialog").showModal();
+}
+async function saveTrainee(event){
+  event.preventDefault();
+  if(PREVIEW)return;
+  const f=new FormData($("traineeForm")),v=k=>text(f.get(k));
+  const data={full_name:v("full_name"),phone:v("phone")||null,email:v("email")||null,organization:v("organization")||null,notes:v("notes")||null};
+  if(data.full_name.length<2){$("traineeFormMessage").textContent="اسم المتدرب لازم يكون حرفين على الأقل.";return}
+  const button=$("saveTrainee");button.disabled=true;$("traineeFormMessage").textContent="جارٍ الحفظ...";
+  try{
+    const path=editingTraineeId?"/rest/v1/trainees?id=eq."+encodeURIComponent(editingTraineeId):"/rest/v1/trainees";
+    const rows=await http(path,{method:editingTraineeId?"PATCH":"POST",headers:{Prefer:"return=representation"},body:JSON.stringify(data)});
+    if(!rows?.length)throw Error("ما تأكد حفظ بيانات المتدرب.");
+    $("traineeDialog").close();await listData();showScreen("trainees");
+    setNotice("تم حفظ بيانات المتدرب بنجاح.");
+  }catch(error){$("traineeFormMessage").textContent="تعذر حفظ المتدرب: "+error.message}
+  finally{button.disabled=false}
+}
+function openRequestDetails(id){
+  const r=registrations.find(x=>String(x.id)===String(id));if(!r)return;
+  const field=(label,v)=>'<div class="request-field"><small>'+escapeHTML(label)+'</small><strong>'+escapeHTML(v||"—")+'</strong></div>';
+  $("requestDetailsTitle").textContent="طلب التسجيل #"+r.id;
+  $("requestDetailFields").innerHTML=
+    field("اسم المتدرب",r.full_name)+field("رقم الهاتف",r.phone)+
+    field("البريد الإلكتروني",r.email)+field("الشركة / جهة العمل",r.organization)+
+    field("الدورة المطلوبة",requestName(r))+field("تاريخ التقديم",dateLabel(r.created_at))+
+    field("حالة الطلب",stateLabels[r.status]||r.status)+field("تاريخ التواصل",dateLabel(r.contacted_at))+
+    '<div class="request-field wide"><small>الملاحظات</small><strong class="multiline">'+escapeHTML(r.notes||"لا توجد ملاحظات")+'</strong></div>';
+  const linked=trainees.find(t=>String(t.id)===String(r.trainee_id));
+  $("requestTraineeLink").textContent=linked?"مرتبط بملف المتدرب: "+linked.full_name:"لم يتم ربط الطلب بملف متدرب بعد.";
+  $("approveTraineeButton").classList.toggle("hidden",!!linked||PREVIEW);
+  $("approveTraineeButton").dataset.requestId=r.id;
+  $("requestDetailsMessage").textContent="";
+  $("requestDialog").showModal();
+}
+async function approveRequestTrainee(id){
+  if(PREVIEW)return;
+  const r=registrations.find(x=>String(x.id)===String(id));if(!r||r.trainee_id)return;
+  const button=$("approveTraineeButton");button.disabled=true;$("requestDetailsMessage").textContent="جارٍ ربط سجل المتدرب...";
+  try{
+    const phone=text(r.phone).replace(/[^0-9+]/g,""),email=text(r.email).toLocaleLowerCase();
+    const matching=trainees.filter(t=>(phone&&text(t.phone).replace(/[^0-9+]/g,"")===phone)||
+      (email&&text(t.email).toLocaleLowerCase()===email));
+    if(matching.length>1)throw Error("وجدت أكثر من ملف بنفس الهاتف أو البريد. راجع الملفات قبل الربط.");
+    let trainee=matching[0];
+    if(trainee){
+      if(!window.confirm('الطلب يطابق ملف المتدرب "'+trainee.full_name+'". ربط الطلب بهذا الملف؟'))return;
+    }else{
+      const rows=await http("/rest/v1/trainees",{method:"POST",headers:{Prefer:"return=representation"},body:JSON.stringify({
+        full_name:r.full_name,phone:r.phone||null,email:r.email||null,organization:r.organization||null
+      })});
+      trainee=rows?.[0];if(!trainee?.id)throw Error("تعذر إنشاء سجل المتدرب.");
+    }
+    const saved=await http("/rest/v1/registration_requests?id=eq."+encodeURIComponent(r.id)+"&trainee_id=is.null",{
+      method:"PATCH",headers:{Prefer:"return=representation"},body:JSON.stringify({trainee_id:trainee.id})
+    });
+    if(!saved?.length)throw Error("لم يتم ربط الطلب؛ قد يكون تم تحديثه من مستخدم آخر.");
+    $("requestDialog").close();await listData();showScreen("requests");
+    setNotice("تم ربط الطلب بملف المتدرب "+trainee.full_name+".");
+  }catch(error){$("requestDetailsMessage").textContent="تعذر الربط: "+error.message;await listData()}
+  finally{button.disabled=false}
+}
+function renderAll(){renderDashboard();renderCourses();renderRequests();renderTrainees()}
 function showScreen(next){
-  if(["dashboard","courses","requests"].includes(next)){screen=next}
+  if(["dashboard","courses","requests","trainees"].includes(next)){screen=next}
   else{screen="placeholder";$("placeholderTitle").textContent={
     trainees:"المتدربون",certificates:"الشهادات",staff:"الموظفون",departments:"الأقسام",
     projects:"أعمال ومشاريع الشركة",news:"الأخبار والفعاليات",banners:"البنرات والمحتوى",
     notifications:"الإشعارات",reports:"التقارير والإحصائيات",settings:"إعدادات النظام"
   }[next]||"القسم"}
-  ["dashboard","courses","requests","placeholder"].forEach(id=>$(id+"Screen").classList.toggle("hidden",id!==screen));
+  ["dashboard","courses","requests","trainees","placeholder"].forEach(id=>$(id+"Screen").classList.toggle("hidden",id!==screen));
   document.querySelectorAll(".nav-item").forEach(node=>node.classList.toggle("active",node.dataset.screen===next));
   $("sidebar").classList.remove("open");$("sideBackdrop").classList.remove("open");
   window.scrollTo({top:0,behavior:"auto"});
@@ -284,9 +382,13 @@ async function commitDraftDelete(id){
 }
 async function updateRequest(id,status){
   if(PREVIEW)return;
+  if(!Object.hasOwn(stateLabels,status)){setNotice("حالة الطلب غير معروفة.",true);return}
+  const request=registrations.find(x=>String(x.id)===String(id));if(!request)return;
   try{
+    const data={status};
+    if(status==="contacted"&&!request.contacted_at)data.contacted_at=new Date().toISOString();
     await http("/rest/v1/registration_requests?id=eq."+encodeURIComponent(id),{
-      method:"PATCH",headers:{Prefer:"return=minimal"},body:JSON.stringify({status})
+      method:"PATCH",headers:{Prefer:"return=minimal"},body:JSON.stringify(data)
     });
     await listData();setNotice("تم تحديث حالة طلب التسجيل.");
   }catch(error){setNotice("تعذر تعديل حالة الطلب: "+error.message,true);await listData();}
@@ -337,6 +439,20 @@ function bindUI(){
   });
   $("courseForm").elements.namedItem("slug").addEventListener("input",e=>e.target.dataset.manual="1");
   $("requestRows").addEventListener("change",e=>{if(e.target.matches(".request-status"))updateRequest(e.target.dataset.request,e.target.value)});
+  $("requestRows").addEventListener("click",e=>{const b=e.target.closest("[data-request-detail]");if(b)openRequestDetails(b.dataset.requestDetail)});
+  $("requestSearch").addEventListener("input",renderRequests);
+  $("requestFilter").addEventListener("change",renderRequests);
+  $("reloadRequests").addEventListener("click",listData);
+  $("traineeSearch").addEventListener("input",renderTrainees);
+  $("reloadTrainees").addEventListener("click",listData);
+  $("addTrainee").addEventListener("click",()=>openTrainee());
+  $("traineeRows").addEventListener("click",e=>{const b=e.target.closest("[data-trainee-edit]");if(b)openTrainee(b.dataset.traineeEdit)});
+  $("traineeForm").addEventListener("submit",saveTrainee);
+  $("closeTraineeDialog").addEventListener("click",()=>$("traineeDialog").close());
+  $("cancelTraineeDialog").addEventListener("click",()=>$("traineeDialog").close());
+  $("closeRequestDialog").addEventListener("click",()=>$("requestDialog").close());
+  $("dismissRequestDialog").addEventListener("click",()=>$("requestDialog").close());
+  $("approveTraineeButton").addEventListener("click",e=>approveRequestTrainee(e.currentTarget.dataset.requestId));
 }
 async function boot(){
   bindUI();
