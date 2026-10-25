@@ -30,7 +30,11 @@ const t=($("courseSearch").value||"").trim().toLowerCase();
 const filtered=courses.filter(c=>([c.title_ar,c.title_en,c.short_description_ar].join(" ").toLowerCase().includes(t)));
 $("courseList").innerHTML=filtered.map(c=>'<button class="list-course" data-course="'+escape(c.id)+'">'+pic(c,c.title_ar)+'<span class="list-copy"><strong>'+escape(c.title_ar)+'</strong><p>'+escape(c.short_description_ar||"عرض نبذة ومحاور الدورة")+'</p><span class="action-link">تفاصيل الدورة ←</span></span></button>').join("")||empty(t?"لا توجد دورة تطابق البحث":"لا توجد دورات منشورة حالياً","بعد نشر الدورات من لوحة الإدارة ستظهر هنا.");
 const upcoming=courses.filter(c=>c.is_featured);
-$("homeCourses").innerHTML=(upcoming.length?upcoming:courses).slice(0,4).map(courseCard).join("")||empty("الدورات القادمة","لا توجد دورات منشورة حالياً.");
+$("homeCourses").innerHTML=(upcoming.length?upcoming:courses).slice(0,4).map(courseCard).join("")||(
+'<article class="course-card empty-preview"><div class="course-image"><img src="'+escape(refinery)+'" alt="منشأة نفط وغاز" loading="lazy"></div><div class="course-body"><h3>برامج التدريب في النفط والغاز</h3><div class="course-date">'+symbol("i-calendar")+'بانتظار الإعلان الرسمي</div><button type="button" data-go="courses">استكشف الدورات ←</button></div></article>'+
+'<article class="course-card empty-preview"><div class="course-image"><img src="'+escape(training)+'" alt="التدريب الهندسي" loading="lazy"></div><div class="course-body"><h3>برامج التطوير المهني</h3><div class="course-date">'+symbol("i-calendar")+'بانتظار النشر</div><button type="button" data-go="sections">تصفح الأقسام ←</button></div></article>'+
+'<p class="empty-disclaimer">بطاقات تعريفية بالمجالات، وليست دورات مجدولة. تظهر الدورات الفعلية هنا بعد نشرها من الإدارة.</p>'
+);
 }
 function isRegOpen(c){return !preview && !!offer(c.id)}
 function tabs(){return [["about","نبذة"],["topics","المحاور"],["certificate","الشهادة"],["photos","الصور"],["reviews","التقييمات"]].map(([id,label])=>'<button data-tab="'+id+'" class="'+(detailTab===id?"active":"")+'" role="tab" aria-selected="'+(detailTab===id?"true":"false")+'">'+label+'</button>').join("")}
