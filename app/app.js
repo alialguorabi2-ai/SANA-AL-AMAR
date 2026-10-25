@@ -117,6 +117,7 @@ else if(el.dataset.account){const items={profile:"البيانات الشخصي�
 });
 $("headerBack").addEventListener("click",()=>go(page==="details"?"courses":page==="courses"?"sections":"sections"));
 $("headerAction").addEventListener("click",()=>{if(page==="sections")go("courses");else if(page==="home")go("account");else $("accountNotice").textContent="إعدادات الحساب ستكون متاحة بعد تفعيل حساب المتدرب."});
+document.addEventListener("error",event=>{const img=event.target;if(!(img instanceof HTMLImageElement)||img.dataset.fallbackDone==="1")return;img.dataset.fallbackDone="1";img.classList.add("fallback-logo");img.src="../assets/sana-logo.png";},true);
 $("courseSearch").addEventListener("input",renderCourses);
 load();go(location.hash.slice(1)||"home");
 })();
